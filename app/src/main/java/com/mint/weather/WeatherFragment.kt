@@ -1,17 +1,13 @@
 package com.mint.weather
 
 import android.Manifest
-import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Bundle
-import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
@@ -73,85 +69,76 @@ class WeatherFragment : Fragment() {
     }
 
     private fun checkLocationPermission() {
-        if (ActivityCompat.checkSelfPermission(
+        val requestPermissionLauncher =
+            registerForActivityResult(
+                ActivityResultContracts.RequestPermission()
+            ) { isGranted: Boolean ->
+                if (isGranted) {
+                    fusedLocationProvider?.lastLocation?.addOnSuccessListener(requireActivity()) { location ->
+                        if (location != null) {
+                            longitude = location.longitude
+                            latitude = location.latitude
+                            getWeatherNow(latitude, longitude)
+                            setValues(latitude, longitude)
+                        }
+                    }
+                } else {
+
+//                    AlertDialog.Builder(requireContext())
+//                        .setTitle("Данному приложению требуется разрешение опредения местоположения")
+//                        .setMessage("При отсутствии разрешения некоторые функции могут не работать")
+//                        .setPositiveButton(
+//                            "Понятно"
+//                        ) { _, _ ->
+//                        }
+//                        .create()
+//                        .show()
+
+                    getWeatherNow(latitude, longitude)
+                    setValues(latitude, longitude)
+                }
+            }
+
+        when {
+            ContextCompat.checkSelfPermission(
                 requireContext(),
                 Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(
-                    requireActivity(),
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                )
-            ) {
+            ) == PackageManager.PERMISSION_GRANTED -> {
+                // You can use the API that requires the permission.
+                fusedLocationProvider?.lastLocation?.addOnSuccessListener(requireActivity()) { location ->
+                    if (location != null) {
+                        longitude = location.longitude
+                        latitude = location.latitude
+                        getWeatherNow(latitude, longitude)
+                        setValues(latitude, longitude)
+                    }
+                }
+            }
+            shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) -> {
                 AlertDialog.Builder(requireContext())
-                    .setTitle("Location Permission Needed")
-                    .setMessage("This app needs the Location permission, please accept to use location functionality")
+                    .setTitle("Данному приложению требуется разрешение на местоположения")
+                    .setMessage("Показать диалог с запросом разрешения?")
                     .setPositiveButton(
-                        "OK"
+                        "Да"
                     ) { _, _ ->
-                        requestLocationPermission()
+                        requestPermissionLauncher.launch(
+                            Manifest.permission.ACCESS_FINE_LOCATION
+                        )
+                    }
+                    .setNegativeButton("Нет, спасибо")
+                    { _, _ ->
+                        getWeatherNow(latitude, longitude)
+                        setValues(latitude, longitude)
                     }
                     .create()
                     .show()
-            } else {
-                requestLocationPermission()
             }
-        }
-    }
-
-    private fun requestLocationPermission() {
-        requestPermissions(
-
-            arrayOf(
-                Manifest.permission.ACCESS_FINE_LOCATION,
-            ),
-            MY_PERMISSIONS_REQUEST_LOCATION
-        )
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray
-    ) {
-        when (requestCode) {
-            MY_PERMISSIONS_REQUEST_LOCATION -> {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    if (ContextCompat.checkSelfPermission(
-                            requireContext(),
-                            Manifest.permission.ACCESS_FINE_LOCATION
-                        ) == PackageManager.PERMISSION_GRANTED
-                    ) {
-                        fusedLocationProvider?.lastLocation?.addOnSuccessListener(requireActivity()) { location ->
-                            if (location != null) {
-                                longitude = location.longitude
-                                latitude = location.latitude
-                                getWeatherNow(latitude, longitude)
-
-                            }
-                        }
-                    }
-
-                } else {
-                    Toast.makeText(requireContext(), "permission denied", Toast.LENGTH_LONG).show()
-                    getWeatherNow(latitude, longitude)
-                    // Check if we are in a state where the user has denied the permission and
-                    // selected Don't ask again
-                    if (!ActivityCompat.shouldShowRequestPermissionRationale(
-                            requireActivity(),
-                            Manifest.permission.ACCESS_FINE_LOCATION
-                        )
-                    ) {
-                        startActivity(//todo разобраться как это работает, что вызывается
-                            Intent(
-                                Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                                Uri.fromParts("package", requireContext().packageName, null),
-                            ),
-                        )
-                    }
-                }
-                return
+            else -> {
+                // You can directly ask for the permission.
+                // The registered ActivityResultCallback gets the result of this request.
+                requestPermissionLauncher.launch(
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                )
             }
         }
     }
