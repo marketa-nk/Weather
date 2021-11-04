@@ -4,9 +4,9 @@ import com.google.gson.annotations.SerializedName
 
 data class WeatherNow (
     val coord: Coord,
-    val weather: List<Weather>,
+    val weather: List<Weather1>,
     val base: String,
-    val main: Main,
+    val main: MainNow,
     val visibility: Long,
     val wind: Wind,
     val clouds: Clouds,
@@ -27,7 +27,7 @@ data class Coord (
     val lat: Double
 )
 
-data class Main (
+data class MainNow (
     val temp: Double,
 
     @SerializedName("feels_like")
@@ -57,7 +57,7 @@ data class Sys (
     val sunset: Long
 )
 
-data class Weather (
+data class Weather1 (
     val id: Long,
     val main: String,
     val description: String,

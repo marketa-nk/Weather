@@ -5,11 +5,10 @@ import retrofit2.http.GET
 import retrofit2.http.Query
 
 interface WeatherApi {
-    @GET("geo/1.0/direct")
-    fun getCities(@Query("q") city: String): Call<List<City>>
 
-    @GET("data/2.5/weather?units=metric&lang=ru")
-    fun getWeatherNow(@Query("lat") lat: Double,@Query("lon") lon: Double ): Call<WeatherNow>
+    @GET("data/2.5/onecall?exclude=minutely&&units=metric&lang=ru")
+    fun getActualWeather(@Query("lat") lat: Double,@Query("lon") lon: Double ): Call<ActualWeather>
 
-
+    @GET("geo/1.0/reverse?limit=5")
+    fun getCity(@Query("lat") lat: Double, @Query("lon") lon: Double ): Call<List<City>>
 }
