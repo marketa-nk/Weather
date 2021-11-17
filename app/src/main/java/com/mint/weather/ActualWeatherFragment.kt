@@ -14,7 +14,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import com.mint.weather.databinding.FragmentActualWeatherBinding
+import com.google.android.material.appbar.AppBarLayout
+import com.mint.weather.databinding.FragmentActualWeatherNewBinding
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -26,7 +27,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 
 class ActualWeatherFragment : Fragment() {
-    private var _binding: FragmentActualWeatherBinding? = null
+    private var _binding: FragmentActualWeatherNewBinding? = null
     private val binding get() = _binding!!
 
     private val actualWeatherApi: WeatherApi by lazy { getActualWeatherApi("https://api.openweathermap.org/") }
@@ -38,6 +39,8 @@ class ActualWeatherFragment : Fragment() {
     private var longitude: Double = 27.5667
 
     private var fusedLocationProvider: FusedLocationProviderClient? = null
+
+    private lateinit var runnable: Runnable
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,9 +55,30 @@ class ActualWeatherFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentActualWeatherBinding.inflate(inflater, container, false)
+        _binding = FragmentActualWeatherNewBinding.inflate(inflater, container, false)
         binding.hourlyWeatherRecyclerView.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         binding.dailyWeatherRecyclerView.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
+
+        binding.appBarMain.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { _, verticalOffset ->
+            binding.swipeRefresh.isEnabled = verticalOffset == 0
+        })
+
+        binding.swipeRefresh.setOnRefreshListener {
+            // Update the text view text with a random number
+            sendBaseRequests(latitude, longitude)
+
+            // Hide swipe to refresh icon animation
+            binding.swipeRefresh.isRefreshing = false
+
+        }
+
+        binding.swipeRefresh.setColorSchemeResources(
+            android.R.color.holo_blue_bright,
+            android.R.color.holo_green_light,
+            android.R.color.holo_orange_light,
+            android.R.color.holo_red_light
+        )
+
         return binding.root
     }
 
@@ -126,19 +150,26 @@ class ActualWeatherFragment : Fragment() {
 
     private fun sendBaseRequests(lat: Double, lon: Double) {
         getWeatherNow(lat, lon)
-        getCity(lat, lon)
+        getCity(lat, lon) {
+            binding.cityName.text = it
+        }
     }
 
-    private fun getCity(lat: Double, lon: Double) {
+    private fun getCity(lat: Double, lon: Double, onSuccess: (String) -> Unit) {
         val cities: Call<List<City>> = actualWeatherApi.getCity(lat, lon)
 
         cities.enqueue(object : Callback<List<City>> {
             override fun onResponse(call: Call<List<City>>, response: Response<List<City>>) {
 
-                val city = response.body()?.firstOrNull()
-                if (city != null) {
-                    binding.cityName.text = city.localNames.ru ?: city.name
-                }
+//                val city = response.body()?.firstOrNull()
+//                    .let { it?.localNames?.ru ?: it?.name }
+//                    .orEmpty()
+//val citiesList = response.body()?.map { City(it.name, it.localNames, it.lat, it.lon, it.country) }
+                val citY = response.body()?.map { City(it.name, it.localNames, it.lat, it.lon, it.country) }?.minByOrNull { it.getDistance(lat, lon) }.let { it?.localNames?.ru ?: it?.name }
+                    .orEmpty()
+
+//                onSuccess.invoke(city)
+                onSuccess(citY)
             }
 
             override fun onFailure(call: Call<List<City>>, t: Throwable?) {}

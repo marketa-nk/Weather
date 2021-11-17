@@ -9,6 +9,6 @@ interface WeatherApi {
     @GET("data/2.5/onecall?exclude=minutely&&units=metric&lang=ru")
     fun getActualWeather(@Query("lat") lat: Double,@Query("lon") lon: Double ): Call<ActualWeather>
 
-    @GET("geo/1.0/reverse?limit=5")
+    @GET("geo/1.0/reverse?limit=10")
     fun getCity(@Query("lat") lat: Double, @Query("lon") lon: Double ): Call<List<City>>
 }

@@ -1,6 +1,7 @@
 package com.mint.weather
 
 import com.google.gson.annotations.SerializedName
+import java.lang.Math.sqrt
 
 data class City(
     val name: String,
@@ -9,7 +10,14 @@ data class City(
     val lat: Double,
     val lon: Double,
     val country: String
-)
+){
+    fun getDistance(latitude: Double, longitude: Double): Double{
+        val distanceX = lat - latitude
+        val distanceY = lon - longitude
+
+        return kotlin.math.sqrt(distanceX * distanceX + distanceY * distanceY)
+    }
+}
 
 data class LocalNames(
     @SerializedName("feature_name")
