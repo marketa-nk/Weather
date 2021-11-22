@@ -10,5 +10,5 @@ interface WeatherApi {
     fun getActualWeather(@Query("lat") lat: Double,@Query("lon") lon: Double ): Call<ActualWeather>
 
     @GET("geo/1.0/reverse?limit=10")
-    fun getCity(@Query("lat") lat: Double, @Query("lon") lon: Double ): Call<List<City>>
+    fun getCity(@Query("lat") lat: Double, @Query("lon") lon: Double ): Call<List<CityNetwork>>
 }

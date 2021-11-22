@@ -2,7 +2,7 @@ package com.mint.weather.network
 
 import com.google.gson.annotations.SerializedName
 
-data class City(
+data class CityNetwork(
     val name: String,
     @SerializedName("local_names")
     val localNames: LocalNames,
@@ -10,7 +10,7 @@ data class City(
     val lon: Double,
     val country: String
 ){
-    fun getDistance(latitude: Double, longitude: Double): Double{
+    fun getDistance(latitude: Double, longitude: Double): Double {
         val distanceX = lat - latitude
         val distanceY = lon - longitude
 

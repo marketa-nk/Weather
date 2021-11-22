@@ -1,14 +1,16 @@
 package com.mint.weather.model
 
+import java.util.*
+
 
 data class HourWeather(
-    override val dateTime: Long,
+    override val date: Date,
     val temp: Double,
     val icon: String
 ): Time
 
 data class DailyWeatherShort(
-    override val dateTime: Long,
+    override val date: Date,
     val tempDay: Double,
     val tempNight: Double,
     val icon: String,
@@ -72,7 +74,7 @@ data class WeatherMain(
     val humidity: Long,
 )
 interface Time {
-    val dateTime: Long
+    val date: Date
 }
 
 

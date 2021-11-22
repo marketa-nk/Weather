@@ -5,7 +5,6 @@ import com.arellomobile.mvp.viewstate.strategy.AddToEndSingleStrategy
 import com.arellomobile.mvp.viewstate.strategy.StateStrategyType
 import com.mint.weather.model.DailyWeatherShort
 import com.mint.weather.model.Time
-import com.mint.weather.network.ActualWeather
 import com.mint.weather.model.WeatherMain
 
 @StateStrategyType(value = AddToEndSingleStrategy::class)

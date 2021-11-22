@@ -37,8 +37,8 @@ class ActualWeatherFragment : MvpAppCompatFragment(), WeatherView {
 
     private var fusedLocationProvider: FusedLocationProviderClient? = null
 
-    private val hourlyWeatherAdapter = HourlyWeatherAdapter(emptyList())
-    private val dailyWeatherAdapter = DailyWeatherAdapter(emptyList())
+    private val hourlyWeatherAdapter = HourlyWeatherAdapter()
+    private val dailyWeatherAdapter = DailyWeatherAdapter()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -166,8 +166,8 @@ class ActualWeatherFragment : MvpAppCompatFragment(), WeatherView {
             .load("https://openweathermap.org/img/wn/${weather.icon}@2x.png")
             .into(binding.icon)
 
-        hourlyWeatherAdapter.setItems(hourlyWeather)
-        dailyWeatherAdapter.setItems(dailyWeather)
+        hourlyWeatherAdapter.submitList(hourlyWeather)
+        dailyWeatherAdapter.submitList(dailyWeather)
     }
 }
 
