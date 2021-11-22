@@ -6,7 +6,7 @@
     app:startDestination="@id/actualWeatherFragment">
     <fragment
         android:id="@+id/actualWeatherFragment"
-        android:name="com.mint.weather.ActualWeatherFragment"
+        android:name="com.mint.weather.actualweather.ActualWeatherFragment"
         android:label="fragment_actual_weather"
         tools:layout="@layout/fragment_actual_weather" />
 </navigation>

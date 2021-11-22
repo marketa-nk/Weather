@@ -1,5 +1,6 @@
-package com.mint.weather
+package com.mint.weather.model
 
+import com.mint.weather.R
 import java.lang.IllegalStateException
 
 enum class WindDirections(

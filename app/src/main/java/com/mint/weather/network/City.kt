@@ -1,7 +1,6 @@
-package com.mint.weather
+package com.mint.weather.network
 
 import com.google.gson.annotations.SerializedName
-import java.lang.Math.sqrt
 
 data class City(
     val name: String,

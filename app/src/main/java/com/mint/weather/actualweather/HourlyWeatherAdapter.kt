@@ -1,11 +1,14 @@
-package com.mint.weather
+package com.mint.weather.actualweather
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.mint.weather.R
 import com.mint.weather.databinding.ViewHourWeatherBinding
-import com.mint.weather.databinding.ViewSunriseSunsetBinding
+import com.mint.weather.model.HourWeather
+import com.mint.weather.model.Sunrise
+import com.mint.weather.model.Sunset
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -46,6 +49,10 @@ class HourlyWeatherAdapter(
             is Sunset -> TYPE_SUNSET
             else -> throw IllegalStateException("Unexpected value")
         }
+    }
+    fun setItems(items: List<Any>){
+        this.items = items
+        notifyItemRangeChanged(0,items.size)
     }
 
     inner class SunriseViewHolder(private val binding: ViewHourWeatherBinding) : RecyclerView.ViewHolder(binding.root) {

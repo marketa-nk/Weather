@@ -1,4 +1,4 @@
-package com.mint.weather
+package com.mint.weather.network
 
 import retrofit2.Call
 import retrofit2.http.GET

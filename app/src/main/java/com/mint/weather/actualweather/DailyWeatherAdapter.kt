@@ -1,4 +1,4 @@
-package com.mint.weather
+package com.mint.weather.actualweather
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -11,7 +11,10 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.mint.weather.R
 import com.mint.weather.databinding.ViewDailyWeatherBinding
+import com.mint.weather.model.DailyWeatherShort
+import com.mint.weather.model.WindDirections
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -32,6 +35,11 @@ class DailyWeatherAdapter(
 
     override fun getItemCount(): Int {
         return items.size
+    }
+
+    fun setItems(items: List<DailyWeatherShort>){
+        this.items = items
+        notifyItemRangeChanged(0,items.size)
     }
 
 
