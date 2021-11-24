@@ -1,4 +1,4 @@
-package com.mint.weather.actualweather
+package com.mint.weather.actualweather.adapter
 
 import androidx.recyclerview.widget.DiffUtil
 import com.mint.weather.model.DailyWeatherShort

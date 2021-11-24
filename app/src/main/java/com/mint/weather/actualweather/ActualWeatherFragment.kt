@@ -18,11 +18,14 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.material.appbar.AppBarLayout
 import com.mint.weather.R
+import com.mint.weather.actualweather.adapter.DailyWeatherAdapter
+import com.mint.weather.actualweather.adapter.HourlyWeatherAdapter
 import com.mint.weather.databinding.FragmentActualWeatherNewBinding
 import com.mint.weather.model.DailyWeatherShort
 import com.mint.weather.model.Time
 import com.mint.weather.model.WeatherMain
 import com.mint.weather.model.WindDirections
+import com.mint.weather.network.LocationService
 
 class ActualWeatherFragment : MvpAppCompatFragment(), WeatherView {
 
@@ -35,18 +38,13 @@ class ActualWeatherFragment : MvpAppCompatFragment(), WeatherView {
     private var latitude: Double = 53.9
     private var longitude: Double = 27.5667
 
-    private var fusedLocationProvider: FusedLocationProviderClient? = null
-
     private val hourlyWeatherAdapter = HourlyWeatherAdapter()
     private val dailyWeatherAdapter = DailyWeatherAdapter()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        fusedLocationProvider = LocationServices.getFusedLocationProviderClient(requireContext())
-
         requireLocationPermission()
-
     }
 
     override fun onCreateView(
@@ -128,11 +126,7 @@ class ActualWeatherFragment : MvpAppCompatFragment(), WeatherView {
 
     @SuppressLint("MissingPermission")
     private fun getCurrentLocation() {
-        fusedLocationProvider?.lastLocation?.addOnSuccessListener { location ->
-            if (location != null) {
-                longitude = location.longitude
-                latitude = location.latitude
-            }
+        LocationService.instance.getLocation { latitude, longitude ->
             actualWeatherPresenter.sendBaseRequests(latitude, longitude)
         }
     }

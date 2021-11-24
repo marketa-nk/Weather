@@ -1,4 +1,4 @@
-package com.mint.weather.actualweather
+package com.mint.weather.actualweather.adapter
 
 import android.annotation.SuppressLint
 import androidx.recyclerview.widget.DiffUtil

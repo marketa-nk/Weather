@@ -63,7 +63,6 @@ data class WeatherFeelsLike(
     val morn: Double
 )
 data class WeatherMain(
-
     val temp: Double,
     val description: String,
     val feelsLike: Double,
