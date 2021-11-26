@@ -1,12 +1,12 @@
 package com.mint.weather.actualweather
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
@@ -14,8 +14,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.arellomobile.mvp.MvpAppCompatFragment
 import com.arellomobile.mvp.presenter.InjectPresenter
 import com.bumptech.glide.Glide
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
 import com.google.android.material.appbar.AppBarLayout
 import com.mint.weather.R
 import com.mint.weather.actualweather.adapter.DailyWeatherAdapter
@@ -25,7 +23,6 @@ import com.mint.weather.model.DailyWeatherShort
 import com.mint.weather.model.Time
 import com.mint.weather.model.WeatherMain
 import com.mint.weather.model.WindDirections
-import com.mint.weather.network.LocationService
 
 class ActualWeatherFragment : MvpAppCompatFragment(), WeatherView {
 
@@ -35,16 +32,22 @@ class ActualWeatherFragment : MvpAppCompatFragment(), WeatherView {
     private var _binding: FragmentActualWeatherNewBinding? = null
     private val binding get() = _binding!!
 
-    private var latitude: Double = 53.9
-    private var longitude: Double = 27.5667
-
     private val hourlyWeatherAdapter = HourlyWeatherAdapter()
     private val dailyWeatherAdapter = DailyWeatherAdapter()
 
+    private lateinit var requestPermissionLauncher: ActivityResultLauncher<String>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        requireLocationPermission()
+        requestPermissionLauncher = registerForActivityResult(
+            ActivityResultContracts.RequestPermission()
+        ) { isGranted: Boolean ->
+            if (isGranted) {
+                actualWeatherPresenter.permissionGranted(true)
+            } else {
+                actualWeatherPresenter.permissionGranted(false)
+            }
+        }
     }
 
     override fun onCreateView(
@@ -52,22 +55,22 @@ class ActualWeatherFragment : MvpAppCompatFragment(), WeatherView {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentActualWeatherNewBinding.inflate(inflater, container, false)
+
         binding.hourlyWeatherRecyclerView.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         binding.dailyWeatherRecyclerView.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
+        binding.hourlyWeatherRecyclerView.adapter = hourlyWeatherAdapter
+        binding.dailyWeatherRecyclerView.adapter = dailyWeatherAdapter
 
         binding.appBarMain.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { _, verticalOffset ->
             binding.swipeRefresh.isEnabled = verticalOffset == 0
         })
 
-        binding.hourlyWeatherRecyclerView.adapter = hourlyWeatherAdapter
-        binding.dailyWeatherRecyclerView.adapter = dailyWeatherAdapter
-
         binding.swipeRefresh.setOnRefreshListener {
             // Update the text view text with a random number
-            actualWeatherPresenter.sendBaseRequests(latitude, longitude)
+            actualWeatherPresenter.swipeToRefresh()
 
             // Hide swipe to refresh icon animation
-            binding.swipeRefresh.isRefreshing = false
+            binding.swipeRefresh.isRefreshing = false//todo
 
         }
 
@@ -82,36 +85,20 @@ class ActualWeatherFragment : MvpAppCompatFragment(), WeatherView {
     }
 
     override fun requireLocationPermission() {
-        val requestPermissionLauncher =
-            registerForActivityResult(
-                ActivityResultContracts.RequestPermission()
-            ) { isGranted: Boolean ->
-                if (isGranted) {
-                    getCurrentLocation()
-                } else {
-                    actualWeatherPresenter.sendBaseRequests(latitude, longitude)
-                }
-            }
-
         when {
             ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED -> {
                 // You can use the API that requires the permission.
-                getCurrentLocation()
+                actualWeatherPresenter.permissionGranted(true)
             }
             shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) -> {
                 AlertDialog.Builder(requireContext())
                     .setTitle("Данному приложению требуется разрешение на местоположения")
                     .setMessage("Показать диалог с запросом разрешения?")
-                    .setPositiveButton(
-                        "Да"
-                    ) { _, _ ->
-                        requestPermissionLauncher.launch(
-                            Manifest.permission.ACCESS_FINE_LOCATION
-                        )
+                    .setPositiveButton("Да") { _, _ ->
+                        requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
                     }
-                    .setNegativeButton("Нет, спасибо")
-                    { _, _ ->
-                        actualWeatherPresenter.sendBaseRequests(latitude, longitude)
+                    .setNegativeButton("Нет, спасибо") { _, _ ->
+                        actualWeatherPresenter.permissionGranted(false)
                     }
                     .create()
                     .show()
@@ -124,12 +111,6 @@ class ActualWeatherFragment : MvpAppCompatFragment(), WeatherView {
         }
     }
 
-    @SuppressLint("MissingPermission")
-    private fun getCurrentLocation() {
-        LocationService.instance.getLocation { latitude, longitude ->
-            actualWeatherPresenter.sendBaseRequests(latitude, longitude)
-        }
-    }
 
     override fun setCityName(city: String) {
         binding.cityName.text = city
