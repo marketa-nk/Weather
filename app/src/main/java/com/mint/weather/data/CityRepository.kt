@@ -12,7 +12,7 @@ class CityRepository {
 
     private val networkService = NetworkService().actualWeatherApi
 
-    fun getCity(lat: Double, lon: Double, onSuccess: (String) -> Unit) {
+    fun getCity(lat: Double, lon: Double, onSuccess: (String) -> Unit, onFailure: (Throwable) -> Unit) {
         val cities: Call<List<CityNetwork>> = networkService.getCity(lat, lon)
 
         cities.enqueue(object : Callback<List<CityNetwork>> {
@@ -32,6 +32,7 @@ class CityRepository {
 
             override fun onFailure(call: Call<List<CityNetwork>>, t: Throwable) {
                 t.printStackTrace()
+                onFailure(t)
             }
         })
     }

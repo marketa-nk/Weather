@@ -45,15 +45,29 @@ class ActualWeatherPresenter : MvpPresenter<WeatherView?>() {
     }
 
     private fun updateCity(lat: Double, lon: Double) {
-        cityRepository.getCity(lat, lon) {
-            viewState?.setCityName(it)
-        }
+        cityRepository.getCity(
+            lat, lon,
+            onSuccess = {
+                viewState?.setCityName(it)
+            },
+            onFailure = {
+                viewState?.setCityName("")
+
+            }
+        )
     }
 
     private fun updateWeather(lat: Double, lon: Double) {
-        weatherRepository.getWeatherNow(lat, lon) { weather, hourlyWeather, dailyWeather ->
-            viewState?.showWeather(weather, hourlyWeather, dailyWeather)
-        }
+        weatherRepository.getWeatherNow(
+            lat, lon,
+            onSuccess = { weather, hourlyWeather, dailyWeather ->
+                viewState?.showWeather(weather, hourlyWeather, dailyWeather)
+//                viewState?.showEmptyWeather()
+            },
+            onFailure = {
+                viewState?.showEmptyWeather()
+            }
+        )
     }
 
 }

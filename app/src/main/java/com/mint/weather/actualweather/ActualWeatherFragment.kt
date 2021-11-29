@@ -144,5 +144,30 @@ class ActualWeatherFragment : MvpAppCompatFragment(), WeatherView {
         hourlyWeatherAdapter.submitList(hourlyWeather)
         dailyWeatherAdapter.submitList(dailyWeather)
     }
+
+    override fun showEmptyWeather() {
+        binding.temp.text = "---"
+        binding.feelsLike.text = "Ощущается как: ---"
+        binding.description.text = "---"
+
+        binding.windSpeed.text = "--- м/с"
+        binding.windSpeed.setCompoundDrawablesWithIntrinsicBounds(R.drawable.round_air_24, 0, 0, 0)
+        binding.windSpeed.compoundDrawablePadding = resources.getDimension(R.dimen.in_dp).toInt()
+
+        binding.pressure.text = "--- мм рт.ст."
+        binding.pressure.setCompoundDrawablesWithIntrinsicBounds(R.drawable.round_speed_24, 0, 0, 0)
+        binding.pressure.compoundDrawablePadding = resources.getDimension(R.dimen.in_dp).toInt()
+
+        binding.humidity.text = "---%"
+        binding.humidity.setCompoundDrawablesWithIntrinsicBounds(R.drawable.round_water_drop_24, 0, 0, 0)
+        binding.humidity.compoundDrawablePadding = resources.getDimension(R.dimen.in_dp).toInt()
+
+        Glide
+            .with(binding.root)
+            .clear(binding.icon)
+
+        hourlyWeatherAdapter.submitList(emptyList())
+        dailyWeatherAdapter.submitList(emptyList())
+    }
 }
 
