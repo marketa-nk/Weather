@@ -70,7 +70,7 @@ class ActualWeatherFragment : MvpAppCompatFragment(), WeatherView {
             actualWeatherPresenter.swipeToRefresh()
 
             // Hide swipe to refresh icon animation
-            binding.swipeRefresh.isRefreshing = false//todo
+//            binding.swipeRefresh.isRefreshing = false//todo
 
         }
 
@@ -109,6 +109,14 @@ class ActualWeatherFragment : MvpAppCompatFragment(), WeatherView {
                 requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
             }
         }
+    }
+
+    override fun showProgress() {
+        binding.swipeRefresh.isRefreshing = true
+    }
+
+    override fun hideProgress() {
+        binding.swipeRefresh.isRefreshing = false
     }
 
 

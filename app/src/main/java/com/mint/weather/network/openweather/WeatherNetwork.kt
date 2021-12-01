@@ -1,4 +1,4 @@
-package com.mint.weather.network
+package com.mint.weather.network.openweather
 
 import com.google.gson.annotations.SerializedName
 

@@ -22,4 +22,9 @@ interface WeatherView : MvpView {
     @StateStrategyType(value = OneExecutionStateStrategy::class)
     fun requireLocationPermission()
 
+    @StateStrategyType(value = AddToEndSingleStrategyByTag::class, tag = "PROGRESS")
+    fun showProgress()
+    @StateStrategyType(value = AddToEndSingleStrategyByTag::class, tag = "PROGRESS")
+    fun hideProgress()
+
 }

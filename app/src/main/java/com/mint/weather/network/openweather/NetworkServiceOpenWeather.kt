@@ -1,4 +1,4 @@
-package com.mint.weather.network
+package com.mint.weather.network.openweather
 
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
@@ -6,11 +6,11 @@ import okhttp3.Request
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-class NetworkService {
+class NetworkServiceOpenWeather {
 
-    val actualWeatherApi: WeatherApi = getActualWeatherApi("https://api.openweathermap.org/")
+    val actualOpenWeatherApi: OpenWeatherApi = getActualWeatherApi("https://api.openweathermap.org/")
 
-    private fun getActualWeatherApi(url: String): WeatherApi {
+    private fun getActualWeatherApi(url: String): OpenWeatherApi {
         val build = OkHttpClient.Builder()
             .addInterceptor { chain ->
                 val request: Request = chain.request()
@@ -31,6 +31,6 @@ class NetworkService {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
-        return retrofit.create(WeatherApi::class.java)
+        return retrofit.create(OpenWeatherApi::class.java)
     }
 }

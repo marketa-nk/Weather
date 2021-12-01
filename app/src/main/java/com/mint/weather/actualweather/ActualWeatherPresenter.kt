@@ -2,15 +2,14 @@ package com.mint.weather.actualweather
 
 import com.arellomobile.mvp.InjectViewState
 import com.arellomobile.mvp.MvpPresenter
-import com.mint.weather.data.CityRepository
-import com.mint.weather.data.WeatherRepository
+import com.mint.weather.data.*
 import com.mint.weather.network.LocationService
 
 @InjectViewState
 class ActualWeatherPresenter : MvpPresenter<WeatherView?>() {
 
-    private val cityRepository = CityRepository()
-    private val weatherRepository = WeatherRepository()
+    private val cityRepository: CityRepository = CityRepositoryGoogleMaps()
+    private val weatherRepository: WeatherRepository = WeatherRepositoryImpl()
 
     private var lat: Double = 53.9
     private var lon: Double = 27.5667
@@ -23,17 +22,22 @@ class ActualWeatherPresenter : MvpPresenter<WeatherView?>() {
     fun permissionGranted(granted: Boolean) {
         if (granted) {
             getCurrentLocation {
-                updateCity(lat, lon)
-                updateWeather(lat, lon)
+//                updateCity(lat, lon)
+//                updateWeather(lat, lon)
+                swipeToRefresh()
             }
         } else {
-            updateCity(lat, lon)
-            updateWeather(lat, lon)
+//            updateCity(lat, lon)
+//            updateWeather(lat, lon)
+            swipeToRefresh()
         }
     }
 
     fun swipeToRefresh() {
+        viewState?.showProgress()
         updateWeather(lat, lon)
+        updateCity(lat, lon)
+        viewState?.hideProgress()
     }
 
     private fun getCurrentLocation(onSuccess: () -> Unit) {
