@@ -3,43 +3,30 @@ package com.mint.weather.data
 import com.mint.weather.model.*
 import com.mint.weather.network.openweather.ActualWeather
 import com.mint.weather.network.openweather.NetworkServiceOpenWeather
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import io.reactivex.Observable
 import java.util.*
 
 class WeatherRepositoryImpl : WeatherRepository {
 
     private val networkService = NetworkServiceOpenWeather().actualOpenWeatherApi
 
-    override fun getWeatherNow(lat: Double, lon: Double, onSuccess: (WeatherMain, List<Time>, List<DailyWeatherShort>) -> Unit, onFailure: (Throwable) -> Unit) {
-        val actualWeather: Call<ActualWeather> = networkService.getActualWeather(lat, lon)
-
-        actualWeather.enqueue(object : Callback<ActualWeather> {
-            override fun onResponse(call: Call<ActualWeather>, response: Response<ActualWeather>) {
-
-                val actualWeather = response.body()
-                if (actualWeather != null) {
-                    val weather = WeatherMain(
-                        actualWeather.current.temp,
-                        actualWeather.current.weather[0].description.replaceFirstChar { c -> c.uppercase() },
-                        actualWeather.current.feelsLike,
-                        actualWeather.current.weather[0].icon,
-                        actualWeather.current.windSpeed,
-                        actualWeather.current.windDeg,
-                        actualWeather.current.pressure,
-                        actualWeather.current.humidity
-                    )
-                    onSuccess(weather, getHourlyWeather(actualWeather), getDailyWeather(actualWeather))
-                }
+    override fun getWeatherNow(lat: Double, lon: Double): Observable<Triple<WeatherMain, List<Time>, List<DailyWeatherShort>>> {
+        return networkService.getActualWeather(lat, lon)
+            .map { response ->
+                val weather = WeatherMain(
+                    response.current.temp,
+                    response.current.weather[0].description.replaceFirstChar { c -> c.uppercase() },
+                    response.current.feelsLike,
+                    response.current.weather[0].icon,
+                    response.current.windSpeed,
+                    response.current.windDeg,
+                    response.current.pressure,
+                    response.current.humidity
+                )
+                Triple(weather, getHourlyWeather(response), getDailyWeather(response))
             }
-
-            override fun onFailure(call: Call<ActualWeather>, t: Throwable) {
-                t.printStackTrace()
-                onFailure(t)
-            }
-        })
     }
+
 
     private fun getHourlyWeather(actualWeather: ActualWeather): List<Time> {
         val now = Date()

@@ -1,9 +1,9 @@
 package com.mint.weather.network.openweather
 
-import okhttp3.HttpUrl
+import com.mint.weather.data.QueryInterceptor
 import okhttp3.OkHttpClient
-import okhttp3.Request
 import retrofit2.Retrofit
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 
 class NetworkServiceOpenWeather {
@@ -12,23 +12,14 @@ class NetworkServiceOpenWeather {
 
     private fun getActualWeatherApi(url: String): OpenWeatherApi {
         val build = OkHttpClient.Builder()
-            .addInterceptor { chain ->
-                val request: Request = chain.request()
-
-                val newUrl: HttpUrl = request.url()
-                    .newBuilder()
-                    .addQueryParameter("appid", "b7044fa387aaefecbb6a8888f3624867")
-                    .build()
-
-                val newRequest = request.newBuilder().url(newUrl).build()
-                chain.proceed(newRequest)
-            }
+            .addInterceptor(QueryInterceptor("appid", "b7044fa387aaefecbb6a8888f3624867"))
             .build()
 
         val retrofit = Retrofit.Builder()
             .baseUrl(url)
             .client(build)
             .addConverterFactory(GsonConverterFactory.create())
+            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
             .build()
 
         return retrofit.create(OpenWeatherApi::class.java)
