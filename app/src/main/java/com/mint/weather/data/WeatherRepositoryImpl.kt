@@ -1,17 +1,17 @@
 package com.mint.weather.data
 
 import com.mint.weather.model.*
+import com.mint.weather.network.NetworkService
 import com.mint.weather.network.openweather.ActualWeather
-import com.mint.weather.network.openweather.NetworkServiceOpenWeather
-import io.reactivex.Observable
+import io.reactivex.Single
 import java.util.*
 
 class WeatherRepositoryImpl : WeatherRepository {
 
-    private val networkService = NetworkServiceOpenWeather().actualOpenWeatherApi
+    private val api = NetworkService.instance.openWeatherApi
 
-    override fun getWeatherNow(lat: Double, lon: Double): Observable<Triple<WeatherMain, List<Time>, List<DailyWeatherShort>>> {
-        return networkService.getActualWeather(lat, lon)
+    override fun getWeatherNow(location: Location): Single<Triple<WeatherMain, List<Time>, List<DailyWeatherShort>>> {
+        return api.getActualWeather(location.lat, location.lon)
             .map { response ->
                 val weather = WeatherMain(
                     response.current.temp,

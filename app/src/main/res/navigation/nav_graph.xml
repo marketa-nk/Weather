@@ -8,5 +8,5 @@
         android:id="@+id/actualWeatherFragment"
         android:name="com.mint.weather.actualweather.ActualWeatherFragment"
         android:label="fragment_actual_weather"
-        tools:layout="@layout/fragment_actual_weather" />
+        tools:layout="@layout/fragment_actual_weather_new" />
 </navigation>

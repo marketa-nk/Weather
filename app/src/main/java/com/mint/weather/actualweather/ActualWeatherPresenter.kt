@@ -7,9 +7,9 @@ import com.mint.weather.data.GoogleMapsCityRepository
 import com.mint.weather.data.WeatherRepository
 import com.mint.weather.data.WeatherRepositoryImpl
 import com.mint.weather.model.Location
-import com.mint.weather.network.LocationService
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 
 @InjectViewState
@@ -18,8 +18,9 @@ class ActualWeatherPresenter : MvpPresenter<WeatherView?>() {
     private val cityRepository: CityRepository = GoogleMapsCityRepository()
     private val weatherRepository: WeatherRepository = WeatherRepositoryImpl()
 
-    private var lat: Double = 53.9
-    private var lon: Double = 27.5667
+    private var location: Location = Location(53.9, 27.5667)
+//    private var lat: Double = 53.9
+//    private var lon: Double = 27.5667
 
     private val compositeDisposable = CompositeDisposable()
 
@@ -44,32 +45,40 @@ class ActualWeatherPresenter : MvpPresenter<WeatherView?>() {
 
     private fun reload() {
         viewState?.showProgress()
-        updateWeather(lat, lon)
-        updateCity(lat, lon)
+        updateWeather(location)
+        updateCity(location)
     }
+
 
     private fun getCurrentLocation(onSuccess: () -> Unit) {
-        LocationService.instance.getLocation { latitude, longitude ->
-            lat = latitude
-            lon = longitude
-            onSuccess()
-        }
+        LocationService.instance.getLastLocation()
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({
+                location = it
+                onSuccess()
+            }, {
+                it.printStackTrace()
+            })
+            .addDisposable()
+
     }
 
-    private fun updateCity(lat: Double, lon: Double) {
-        val disposable = cityRepository.getCity(Location(lat, lon))
+    private fun updateCity(location: Location) {
+        cityRepository.getCity(location)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
                 viewState?.setCityName(it.name)
             }, {
                 it.printStackTrace()
+                viewState?.setCityName("")
             })
-        compositeDisposable.add(disposable)
+            .addDisposable()
     }
 
-    private fun updateWeather(lat: Double, lon: Double) {
-        val disposable = weatherRepository.getWeatherNow(lat, lon)
+    private fun updateWeather(location: Location) {
+        weatherRepository.getWeatherNow(location)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({ (weather, hourlyWeather, dailyWeather) ->
@@ -80,7 +89,11 @@ class ActualWeatherPresenter : MvpPresenter<WeatherView?>() {
                 viewState?.showEmptyWeather()
                 viewState?.hideProgress()
             })
-        compositeDisposable.add(disposable)
+            .addDisposable()
+    }
+
+    private fun Disposable.addDisposable() {
+        compositeDisposable.add(this)
     }
 
     override fun onDestroy() {

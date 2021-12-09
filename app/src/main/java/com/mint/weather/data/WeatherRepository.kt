@@ -1,13 +1,14 @@
 package com.mint.weather.data
 
 import com.mint.weather.model.DailyWeatherShort
+import com.mint.weather.model.Location
 import com.mint.weather.model.Time
 import com.mint.weather.model.WeatherMain
-import io.reactivex.Observable
+import io.reactivex.Single
 
 interface WeatherRepository {
 
-    fun getWeatherNow(lat: Double, lon: Double): Observable<Triple<WeatherMain, List<Time>, List<DailyWeatherShort>>>
+    fun getWeatherNow(location: Location): Single<Triple<WeatherMain, List<Time>, List<DailyWeatherShort>>>
 
 }
 
