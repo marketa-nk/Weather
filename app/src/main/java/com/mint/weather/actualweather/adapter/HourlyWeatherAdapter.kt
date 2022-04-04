@@ -52,9 +52,10 @@ class HourlyWeatherAdapter(
         fun bind(sunrise: Sunrise) {
             binding.time.text = SimpleDateFormat("HH:mm").format(sunrise.date)
             binding.temp.text = "восход"
+            binding.icon.setPadding(28,28,28,28)
             Glide
                 .with(itemView)
-                .load(R.drawable.sunrise)
+                .load(R.drawable.ic_sunrise_24)
                 .fitCenter()
                 .into(binding.icon)
         }
@@ -65,10 +66,10 @@ class HourlyWeatherAdapter(
         fun bind(sunset: Sunset) {
             binding.time.text = SimpleDateFormat("HH:mm").format(sunset.date)
             binding.temp.text = "закат"
-            binding.icon.setPadding(9,9,9,9)
+            binding.icon.setPadding(28,28,28,28)
             Glide
                 .with(itemView)
-                .load(R.drawable.sunset)
+                .load(R.drawable.ic_sunset_24)
                 .fitCenter()
                 .into(binding.icon)
         }
