@@ -5,6 +5,7 @@ import android.content.Context
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.annotation.AttrRes
 import androidx.annotation.ColorInt
 import androidx.core.content.ContextCompat
@@ -37,13 +38,13 @@ class DailyWeatherAdapter : ListAdapter<DailyWeatherShort, DailyWeatherAdapter.D
             binding.date.text = SimpleDateFormat("d MMMM").format(dailyWeatherShort.date)
             binding.tempDay.text = temperatureToString(dailyWeatherShort.tempDay)
             binding.tempNight.text = temperatureToString(dailyWeatherShort.tempNight)
-            binding.rain.text = setPrecipitationVolume(dailyWeatherShort.rain)
-            binding.rain.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_outline_water_drop_24, 0)
+            binding.precipitation.text = setPrecipitationVolume(dailyWeatherShort.rain, dailyWeatherShort.snow)
+            binding.precipitation.setPrecipitationDrawables(dailyWeatherShort.tempDay)
 
             binding.windSpeed.setCompoundDrawablesWithIntrinsicBounds(0, 0, dailyWeatherShort.windDirection.directionIcon, 0)
             binding.windSpeed.text = setWindSpeed(dailyWeatherShort.windSpeed, dailyWeatherShort.windGust)
             if (dailyWeatherShort.windGust > 15) {
-                binding.windSpeed.setTextColor(ResourcesCompat.getColor(binding.root.resources, R.color.red_600, binding.root.context.theme))
+                binding.windSpeed.setTextColor(ResourcesCompat.getColor(binding.root.resources, R.color.orange_600, binding.root.context.theme))
             } else {
                 binding.windSpeed.setTextColor(binding.root.context.getColorResCompat(android.R.attr.textColorSecondary))
             }
@@ -71,9 +72,10 @@ class DailyWeatherAdapter : ListAdapter<DailyWeatherShort, DailyWeatherAdapter.D
         return ContextCompat.getColor(this, colorRes)
     }
 
-    fun setPrecipitationVolume(rain: Double?): String {
+    fun setPrecipitationVolume(rain: Double?, snow: Double?): String {
         return when {
             rain != null && rain > 0 -> "${kotlin.math.ceil(rain).toInt()}мм "
+            snow != null && snow > 0 -> "${kotlin.math.ceil(snow).toInt()}мм "
             else -> "— "
         }
     }
@@ -83,5 +85,14 @@ class DailyWeatherAdapter : ListAdapter<DailyWeatherShort, DailyWeatherAdapter.D
             temp >= 1 -> "+${temp.toInt()}°C"
             else -> "${temp.toInt()}°C"
         }
+    }
+}
+
+private fun TextView.setPrecipitationDrawables(tempDay: Double) {
+    if (tempDay >= 0) {
+        this.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_outline_water_drop_24, 0)
+    }
+    else{
+        this.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_snowflake_24, 0)
     }
 }

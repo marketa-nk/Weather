@@ -46,6 +46,7 @@ class WeatherRepositoryImpl : WeatherRepository {
                 it.temp.night,
                 it.weather[0].icon,
                 it.rain,
+                it.snow,
                 it.windSpeed,
                 WindDirections.getWindDirection(it.windDeg),
                 it.windGust

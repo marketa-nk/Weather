@@ -15,6 +15,7 @@ data class DailyWeatherShort(
     val tempNight: Double,
     val icon: String,
     val rain: Double?,
+    val snow: Double?,
     val windSpeed: Double,
     val windDirection: WindDirections,
     val windGust: Double,
