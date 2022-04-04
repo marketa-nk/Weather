@@ -93,6 +93,6 @@ private fun TextView.setPrecipitationDrawables(tempDay: Double) {
         this.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_outline_water_drop_24, 0)
     }
     else{
-        this.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_snowflake_24, 0)
+        this.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_snowflake_16, 0)
     }
 }

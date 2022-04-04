@@ -19,7 +19,7 @@
                 android:id="@+id/collapsing_toolbar_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:contentScrim="@color/design_default_color_primary"
+                app:contentScrim="?attr/colorPrimaryVariant"
                 app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
                 app:scrimAnimationDuration="@integer/material_motion_duration_short_2"
                 app:scrimVisibleHeightTrigger="175dp">
