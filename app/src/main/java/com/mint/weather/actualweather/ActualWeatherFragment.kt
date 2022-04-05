@@ -10,26 +10,25 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.arellomobile.mvp.MvpAppCompatFragment
-import com.arellomobile.mvp.presenter.InjectPresenter
 import com.bumptech.glide.Glide
 import com.google.android.material.appbar.AppBarLayout
 import com.mint.weather.R
 import com.mint.weather.actualweather.adapter.DailyWeatherAdapter
 import com.mint.weather.actualweather.adapter.HourlyWeatherAdapter
-import com.mint.weather.databinding.FragmentActualWeatherNewBinding
+import com.mint.weather.databinding.FragmentActualWeatherBinding
 import com.mint.weather.model.DailyWeatherShort
 import com.mint.weather.model.Time
 import com.mint.weather.model.WeatherMain
 import com.mint.weather.model.WindDirections
 
-class ActualWeatherFragment : MvpAppCompatFragment(), WeatherView {
+class ActualWeatherFragment : Fragment() {
 
-    @InjectPresenter
-    lateinit var actualWeatherPresenter: ActualWeatherPresenter
+    private val viewModel: ActualWeatherViewModel by viewModels()
 
-    private var _binding: FragmentActualWeatherNewBinding? = null
+    private var _binding: FragmentActualWeatherBinding? = null
     private val binding get() = _binding!!
 
     private val hourlyWeatherAdapter = HourlyWeatherAdapter()
@@ -43,9 +42,9 @@ class ActualWeatherFragment : MvpAppCompatFragment(), WeatherView {
             ActivityResultContracts.RequestPermission()
         ) { isGranted: Boolean ->
             if (isGranted) {
-                actualWeatherPresenter.permissionGranted(true)
+                viewModel.permissionGranted(true)
             } else {
-                actualWeatherPresenter.permissionGranted(false)
+                viewModel.permissionGranted(false)
             }
         }
     }
@@ -54,7 +53,7 @@ class ActualWeatherFragment : MvpAppCompatFragment(), WeatherView {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentActualWeatherNewBinding.inflate(inflater, container, false)
+        _binding = FragmentActualWeatherBinding.inflate(inflater, container, false)
 
         binding.hourlyWeatherRecyclerView.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         binding.dailyWeatherRecyclerView.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
@@ -66,12 +65,7 @@ class ActualWeatherFragment : MvpAppCompatFragment(), WeatherView {
         })
 
         binding.swipeRefresh.setOnRefreshListener {
-            // Update the text view text with a random number
-            actualWeatherPresenter.swipeToRefresh()
-
-            // Hide swipe to refresh icon animation
-//            binding.swipeRefresh.isRefreshing = false//todo
-
+            viewModel.swipeToRefresh()
         }
 
         binding.swipeRefresh.setColorSchemeResources(
@@ -81,27 +75,37 @@ class ActualWeatherFragment : MvpAppCompatFragment(), WeatherView {
             android.R.color.holo_red_light
         )
 
+        viewModel.checkLocationPermissionEvent.observe(this.viewLifecycleOwner) {
+            viewModel.permissionGranted(checkLocationPermission())
+        }
+        viewModel.showProgress.observe(this.viewLifecycleOwner) { show ->
+            binding.swipeRefresh.isRefreshing = show
+        }
+        viewModel.showWeather.observe(this.viewLifecycleOwner) {
+            when (it) {
+                is State.Empty -> showEmptyWeather()
+                is State.Data -> showCurrentWeather(it.currentWeather, it.hourlyWeather, it.dailyWeather)
+            }
+        }
+        viewModel.cityName.observe(this.viewLifecycleOwner) {
+            setCityName(it)
+        }
+        viewModel.requireLocationPermissionEvent.observe(this.viewLifecycleOwner) {
+            requireLocationPermission()
+        }
+
         return binding.root
     }
 
-    override fun requireLocationPermission() {
+    private fun requireLocationPermission() {
         when {
             ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED -> {
                 // You can use the API that requires the permission.
-                actualWeatherPresenter.permissionGranted(true)
+//                actualWeatherPresenter.permissionGranted(true)
+                viewModel.permissionGranted(true)
             }
             shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) -> {
-                AlertDialog.Builder(requireContext())
-                    .setTitle("Данному приложению требуется разрешение на местоположения")
-                    .setMessage("Показать диалог с запросом разрешения?")
-                    .setPositiveButton("Да") { _, _ ->
-                        requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-                    }
-                    .setNegativeButton("Нет, спасибо") { _, _ ->
-                        actualWeatherPresenter.permissionGranted(false)
-                    }
-                    .create()
-                    .show()
+                showPermissionAlertDialog()
             }
             else -> {
                 // You can directly ask for the permission.
@@ -111,20 +115,29 @@ class ActualWeatherFragment : MvpAppCompatFragment(), WeatherView {
         }
     }
 
-    override fun showProgress() {
-        binding.swipeRefresh.isRefreshing = true
+    private fun showPermissionAlertDialog() {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Данному приложению требуется разрешение на местоположения")
+            .setMessage("Показать диалог с запросом разрешения?")
+            .setPositiveButton("Да") { _, _ ->
+                requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+            }
+            .setNegativeButton("Нет, спасибо") { _, _ ->
+                viewModel.permissionGranted(false)
+            }
+            .create()
+            .show()
     }
 
-    override fun hideProgress() {
-        binding.swipeRefresh.isRefreshing = false
+    private fun checkLocationPermission(): Boolean {
+        return ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
     }
 
-
-    override fun setCityName(city: String) {
+    private fun setCityName(city: String) {
         binding.cityName.text = city
     }
 
-    override fun showWeather(weather: WeatherMain, hourlyWeather: List<Time>, dailyWeather: List<DailyWeatherShort>) {
+    private fun showCurrentWeather(weather: WeatherMain, hourlyWeather: List<Time>, dailyWeather: List<DailyWeatherShort>) {
 
         binding.temp.text = "${weather.temp.toInt()}°C"
         binding.feelsLike.text = "Ощущается как: ${weather.feelsLike.toInt()}°C"
@@ -145,7 +158,7 @@ class ActualWeatherFragment : MvpAppCompatFragment(), WeatherView {
         binding.humidity.compoundDrawablePadding = resources.getDimension(R.dimen.in_dp).toInt()
 
         Glide
-            .with(binding.root)
+            .with(binding.icon)
             .load("https://openweathermap.org/img/wn/${weather.icon}@2x.png")
             .into(binding.icon)
 
@@ -153,7 +166,7 @@ class ActualWeatherFragment : MvpAppCompatFragment(), WeatherView {
         dailyWeatherAdapter.submitList(dailyWeather)
     }
 
-    override fun showEmptyWeather() {
+    private fun showEmptyWeather() {
         binding.temp.text = "---"
         binding.feelsLike.text = "Ощущается как: ---"
         binding.description.text = "---"
@@ -171,7 +184,7 @@ class ActualWeatherFragment : MvpAppCompatFragment(), WeatherView {
         binding.humidity.compoundDrawablePadding = resources.getDimension(R.dimen.in_dp).toInt()
 
         Glide
-            .with(binding.root)
+            .with(binding.icon)
             .clear(binding.icon)
 
         hourlyWeatherAdapter.submitList(emptyList())

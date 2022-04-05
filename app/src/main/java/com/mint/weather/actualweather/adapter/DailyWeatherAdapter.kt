@@ -50,7 +50,7 @@ class DailyWeatherAdapter : ListAdapter<DailyWeatherShort, DailyWeatherAdapter.D
             }
 
             Glide
-                .with(binding.root)
+                .with(binding.icon)
                 .load("https://openweathermap.org/img/wn/${dailyWeatherShort.icon}@2x.png")
                 .into(binding.icon)
         }

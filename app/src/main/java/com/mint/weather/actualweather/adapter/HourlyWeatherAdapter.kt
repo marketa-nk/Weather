@@ -13,10 +13,7 @@ import com.mint.weather.model.Sunset
 import java.text.SimpleDateFormat
 import java.util.*
 
-class HourlyWeatherAdapter(
-
-) : ListAdapter<Any, RecyclerView.ViewHolder>(HourlyWeatherDiffUtil()) {
-
+class HourlyWeatherAdapter : ListAdapter<Any, RecyclerView.ViewHolder>(HourlyWeatherDiffUtil()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val binding = ViewHourWeatherBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -54,7 +51,7 @@ class HourlyWeatherAdapter(
             binding.temp.text = "восход"
             binding.icon.setPadding(28,28,28,28)
             Glide
-                .with(itemView)
+                .with(binding.icon)
                 .load(R.drawable.ic_sunrise_24)
                 .fitCenter()
                 .into(binding.icon)
@@ -68,7 +65,7 @@ class HourlyWeatherAdapter(
             binding.temp.text = "закат"
             binding.icon.setPadding(28,28,28,28)
             Glide
-                .with(itemView)
+                .with(binding.icon)
                 .load(R.drawable.ic_sunset_24)
                 .fitCenter()
                 .into(binding.icon)
@@ -82,7 +79,7 @@ class HourlyWeatherAdapter(
             binding.temp.text = temperatureToString(hourWeather.temp)
 
             Glide
-                .with(binding.root)
+                .with(binding.icon)
                 .load("https://openweathermap.org/img/wn/${hourWeather.icon}@2x.png")
                 .into(binding.icon)
         }
