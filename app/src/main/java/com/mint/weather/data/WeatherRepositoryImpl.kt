@@ -5,10 +5,11 @@ import com.mint.weather.network.NetworkService
 import com.mint.weather.network.openweather.ActualWeather
 import io.reactivex.Single
 import java.util.*
+import javax.inject.Inject
 
-class WeatherRepositoryImpl : WeatherRepository {
+class WeatherRepositoryImpl @Inject constructor(private val networkService: NetworkService) : WeatherRepository {
 
-    private val api = NetworkService.instance.openWeatherApi
+    private val api = networkService.openWeatherApi
 
     override fun getWeatherNow(location: Location): Single<Triple<WeatherMain, List<Time>, List<DailyWeatherShort>>> {
         return api.getActualWeather(location.lat, location.lon)

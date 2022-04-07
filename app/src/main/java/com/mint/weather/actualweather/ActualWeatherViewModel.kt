@@ -2,11 +2,10 @@ package com.mint.weather.actualweather
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import com.mint.weather.SingleLiveEvent
 import com.mint.weather.data.CityRepository
-import com.mint.weather.data.GoogleMapsCityRepository
 import com.mint.weather.data.WeatherRepository
-import com.mint.weather.data.WeatherRepositoryImpl
 import com.mint.weather.model.DailyWeatherShort
 import com.mint.weather.model.Location
 import com.mint.weather.model.Time
@@ -15,11 +14,13 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
+import javax.inject.Inject
 
-class ActualWeatherViewModel : ViewModel() {
-
-    private val cityRepository: CityRepository = GoogleMapsCityRepository()
-    private val weatherRepository: WeatherRepository = WeatherRepositoryImpl()
+class ActualWeatherViewModel(
+    private val cityRepository: CityRepository,
+    private val weatherRepository: WeatherRepository,
+    private val locationRepository: LocationRepository
+) : ViewModel() {
 
     private var location: Location? = null
 
@@ -56,14 +57,14 @@ class ActualWeatherViewModel : ViewModel() {
             showProgress.value = true
             updateWeather(location)
             updateCity(location)
-        }else{
+        } else {
             showWeather.value = State.Empty
             cityName.value = ""
         }
     }
 
     private fun getCurrentLocation() {
-        LocationService.instance.getLocation()
+        locationRepository.getLastLocation()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
@@ -113,6 +114,19 @@ class ActualWeatherViewModel : ViewModel() {
     override fun onCleared() {
         compositeDisposable.dispose()
         super.onCleared()
+    }
+
+    class ActualWeatherViewModelFactory @Inject constructor(
+        private val cityRepository: CityRepository,
+        private val weatherRepository: WeatherRepository,
+        private val locationRepository: LocationRepository
+    ) : ViewModelProvider.Factory {
+
+        @Suppress("UNCHECKED_CAST")
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            require(modelClass == ActualWeatherViewModel::class.java)
+            return ActualWeatherViewModel(cityRepository, weatherRepository, locationRepository) as T
+        }
     }
 }
 

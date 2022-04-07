@@ -5,11 +5,12 @@ import com.mint.weather.model.Location
 
 import com.mint.weather.network.NetworkService
 import io.reactivex.Single
+import javax.inject.Inject
 
 
-class GoogleMapsCityRepository : CityRepository {
+class GoogleMapsCityRepository @Inject constructor(private val networkService: NetworkService) : CityRepository {
 
-    private val api = NetworkService.instance.googleMapsApi
+    private val api = networkService.googleMapsApi
 
     override fun getCity(location: Location): Single<City> {
         return api.getCity("${location.lat},${location.lon}")

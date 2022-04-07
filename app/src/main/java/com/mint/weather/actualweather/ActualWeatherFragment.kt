@@ -15,6 +15,7 @@ import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.google.android.material.appbar.AppBarLayout
+import com.mint.weather.App
 import com.mint.weather.R
 import com.mint.weather.actualweather.adapter.DailyWeatherAdapter
 import com.mint.weather.actualweather.adapter.HourlyWeatherAdapter
@@ -23,10 +24,14 @@ import com.mint.weather.model.DailyWeatherShort
 import com.mint.weather.model.Time
 import com.mint.weather.model.WeatherMain
 import com.mint.weather.model.WindDirections
+import javax.inject.Inject
 
 class ActualWeatherFragment : Fragment() {
 
-    private val viewModel: ActualWeatherViewModel by viewModels()
+    @Inject
+    lateinit var factory: ActualWeatherViewModel.ActualWeatherViewModelFactory
+
+    private val viewModel: ActualWeatherViewModel by viewModels {factory}
 
     private var _binding: FragmentActualWeatherBinding? = null
     private val binding get() = _binding!!
@@ -38,6 +43,8 @@ class ActualWeatherFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        App.instance.appComponent.injectActualWeatherFragment(this)
+
         requestPermissionLauncher = registerForActivityResult(
             ActivityResultContracts.RequestPermission()
         ) { isGranted: Boolean ->

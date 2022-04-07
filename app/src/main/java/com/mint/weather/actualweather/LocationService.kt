@@ -10,13 +10,14 @@ import com.google.android.gms.location.LocationServices
 import com.mint.weather.model.Location
 import io.reactivex.Observable
 import io.reactivex.Single
+import javax.inject.Inject
 
-class LocationService(context: Context) {
+class LocationService @Inject constructor(context: Context) : LocationRepository {
 
     private val fusedLocationProvider = LocationServices.getFusedLocationProviderClient(context)
 
     @SuppressLint("MissingPermission")
-    fun getLocation(): Observable<Location> {
+    override fun getLocation(): Observable<Location> {
         return Observable.create { emitter ->
             val request = LocationRequest().also {
                 it.interval = 10000
@@ -41,7 +42,7 @@ class LocationService(context: Context) {
     }
 
     @SuppressLint("MissingPermission")
-    fun getLastLocation(): Single<Location> {
+    override fun getLastLocation(): Single<Location> {
         return Single.create { emitter ->
             fusedLocationProvider.lastLocation?.addOnSuccessListener { location ->
                 if (location != null) {
@@ -50,10 +51,5 @@ class LocationService(context: Context) {
             }
         }
     }
-
-    companion object {
-        lateinit var instance: LocationService
-    }
-
 }
 

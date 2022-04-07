@@ -8,8 +8,9 @@ import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
+import javax.inject.Inject
 
-class NetworkService {
+class NetworkService @Inject constructor() {
 
     val googleMapsApi: GoogleMapsApi = getApi(GoogleMapsApi::class.java, "https://maps.googleapis.com/maps/api/geocode/", QueryInterceptor("key", "AIzaSyBuw5zpFxq1U6EpNlwGk8gPEHEB92XGTZA"))
     val openWeatherApi: OpenWeatherApi = getApi(OpenWeatherApi::class.java, "https://api.openweathermap.org/", QueryInterceptor("appid", "b7044fa387aaefecbb6a8888f3624867"))
@@ -32,9 +33,5 @@ class NetworkService {
             .build()
 
         return retrofit.create(clazz)
-    }
-
-    companion object {
-        var instance: NetworkService = NetworkService()
     }
 }

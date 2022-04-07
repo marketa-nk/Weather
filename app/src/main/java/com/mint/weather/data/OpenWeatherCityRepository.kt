@@ -4,10 +4,11 @@ import com.mint.weather.model.City
 import com.mint.weather.model.Location
 import com.mint.weather.network.NetworkService
 import io.reactivex.Single
+import javax.inject.Inject
 
-class OpenWeatherCityRepository : CityRepository {
+class OpenWeatherCityRepository @Inject constructor(private val networkService: NetworkService) : CityRepository {
 
-    private val api = NetworkService.instance.openWeatherApi
+    private val api = networkService.openWeatherApi
 
     override fun getCity(location: Location): Single<City> {
         return api.getCity(location.lat, location.lon)
