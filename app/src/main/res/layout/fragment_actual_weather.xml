@@ -149,12 +149,12 @@
                         android:layout_height="?attr/actionBarSize">
 
                         <ImageView
-                            android:id="@+id/btn_menu"
+                            android:id="@+id/btn_search"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="8dp"
                             android:padding="8dp"
-                            android:src="@drawable/round_menu_24"
+                            android:src="@drawable/ic_round_search_24"
                             app:layout_constraintBottom_toBottomOf="@id/city_name"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toTopOf="@id/city_name" />
@@ -163,24 +163,14 @@
                             android:id="@+id/city_name"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginEnd="52dp"
                             android:gravity="center"
                             android:textSize="18sp"
                             android:textStyle="bold"
                             app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toStartOf="@id/btn_settings"
-                            app:layout_constraintStart_toEndOf="@id/btn_menu"
-                            app:layout_constraintTop_toTopOf="parent" />
-
-                        <ImageView
-                            android:id="@+id/btn_settings"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="8dp"
-                            android:padding="8dp"
-                            android:src="@drawable/ic_baseline_settings_24"
-                            app:layout_constraintBottom_toBottomOf="@id/city_name"
                             app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintTop_toTopOf="@id/city_name" />
+                            app:layout_constraintStart_toEndOf="@id/btn_search"
+                            app:layout_constraintTop_toTopOf="parent" />
 
 
                     </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,11 +1,14 @@
 package com.mint.weather.actualweather
 
 import android.Manifest
+import android.app.Activity
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
@@ -14,6 +17,11 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
+import com.google.android.libraries.places.api.model.Place
+import com.google.android.libraries.places.api.model.TypeFilter
+import com.google.android.libraries.places.widget.Autocomplete
+import com.google.android.libraries.places.widget.AutocompleteActivity
+import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
 import com.google.android.material.appbar.AppBarLayout
 import com.mint.weather.App
 import com.mint.weather.R
@@ -31,7 +39,7 @@ class ActualWeatherFragment : Fragment() {
     @Inject
     lateinit var factory: ActualWeatherViewModel.ActualWeatherViewModelFactory
 
-    private val viewModel: ActualWeatherViewModel by viewModels {factory}
+    private val viewModel: ActualWeatherViewModel by viewModels { factory }
 
     private var _binding: FragmentActualWeatherBinding? = null
     private val binding get() = _binding!!
@@ -40,6 +48,33 @@ class ActualWeatherFragment : Fragment() {
     private val dailyWeatherAdapter = DailyWeatherAdapter()
 
     private lateinit var requestPermissionLauncher: ActivityResultLauncher<String>
+
+    private val findCitiesResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        val data: Intent? = result.data
+        when (result.resultCode) {
+            Activity.RESULT_OK -> {
+                data?.let {
+                    val place = Autocomplete.getPlaceFromIntent(data)
+                    val name = place.name
+                    val latLng = place.latLng
+                    if (latLng != null) {
+                        viewModel.cityIsSelected(name, latLng)
+                    } else {
+                        Toast.makeText(requireContext(), getString(R.string.error), Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+            AutocompleteActivity.RESULT_ERROR -> {
+                data?.let {
+                    val status = Autocomplete.getStatusFromIntent(data)
+                    Toast.makeText(requireContext(), getString(R.string.error_occurred, status.statusMessage), Toast.LENGTH_SHORT).show()
+                }
+            }
+            Activity.RESULT_CANCELED -> {
+                // The user canceled the operation.
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,7 +105,9 @@ class ActualWeatherFragment : Fragment() {
         binding.appBarMain.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { _, verticalOffset ->
             binding.swipeRefresh.isEnabled = verticalOffset == 0
         })
-
+        binding.btnSearch.setOnClickListener {
+            viewModel.searchPressed()
+        }
         binding.swipeRefresh.setOnRefreshListener {
             viewModel.swipeToRefresh()
         }
@@ -90,8 +127,8 @@ class ActualWeatherFragment : Fragment() {
         }
         viewModel.showWeather.observe(this.viewLifecycleOwner) {
             when (it) {
-                is State.Empty -> showEmptyWeather()
-                is State.Data -> showCurrentWeather(it.currentWeather, it.hourlyWeather, it.dailyWeather)
+                is ActualWeatherViewModel.State.Empty -> showEmptyWeather()
+                is ActualWeatherViewModel.State.Data -> showCurrentWeather(it.currentWeather, it.hourlyWeather, it.dailyWeather)
             }
         }
         viewModel.cityName.observe(this.viewLifecycleOwner) {
@@ -99,6 +136,9 @@ class ActualWeatherFragment : Fragment() {
         }
         viewModel.requireLocationPermissionEvent.observe(this.viewLifecycleOwner) {
             requireLocationPermission()
+        }
+        viewModel.showFindCitiesScreen.observe(this.viewLifecycleOwner) {
+            launchFindCitiesActivity()
         }
 
         return binding.root
@@ -138,6 +178,14 @@ class ActualWeatherFragment : Fragment() {
 
     private fun checkLocationPermission(): Boolean {
         return ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+    }
+
+    private fun launchFindCitiesActivity() {
+        val fields = listOf(Place.Field.NAME, Place.Field.LAT_LNG)
+        val intent = Autocomplete.IntentBuilder(AutocompleteActivityMode.OVERLAY, fields)
+            .setTypeFilter(TypeFilter.CITIES)
+            .build(requireContext())
+        findCitiesResultLauncher.launch(intent)
     }
 
     private fun setCityName(city: String) {

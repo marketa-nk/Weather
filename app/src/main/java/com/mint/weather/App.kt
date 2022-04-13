@@ -1,6 +1,7 @@
 package com.mint.weather
 
 import android.app.Application
+import com.google.android.libraries.places.api.Places
 import com.mint.weather.di.AppComponent
 import com.mint.weather.di.ContextModule
 import com.mint.weather.di.DaggerAppComponent
@@ -17,6 +18,10 @@ class App : Application() {
             .build()
 
         instance = this
+
+        if (!Places.isInitialized()) {
+            Places.initialize(applicationContext, getString(R.string.api_key))
+        }
     }
 
     companion object {

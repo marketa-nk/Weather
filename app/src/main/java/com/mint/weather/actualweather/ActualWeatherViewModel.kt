@@ -3,6 +3,7 @@ package com.mint.weather.actualweather
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.google.android.gms.maps.model.LatLng
 import com.mint.weather.SingleLiveEvent
 import com.mint.weather.data.CityRepository
 import com.mint.weather.data.WeatherRepository
@@ -27,6 +28,8 @@ class ActualWeatherViewModel(
     val showProgress: MutableLiveData<Boolean> by lazy { MutableLiveData<Boolean>(false) }
     val checkLocationPermissionEvent: SingleLiveEvent<Unit> by lazy { SingleLiveEvent<Unit>() }
     val cityName: MutableLiveData<String> by lazy { MutableLiveData<String>() }
+
+    val showFindCitiesScreen: SingleLiveEvent<Unit> by lazy { SingleLiveEvent<Unit>() }
 
     val showWeather: MutableLiveData<State> by lazy { MutableLiveData<State>() }
 
@@ -61,6 +64,16 @@ class ActualWeatherViewModel(
             showWeather.value = State.Empty
             cityName.value = ""
         }
+    }
+
+    fun searchPressed() {
+        showFindCitiesScreen.value = Unit
+    }
+
+    fun cityIsSelected(name: String?, latLng: LatLng) {
+        showProgress.value = true
+        cityName.value = name ?: ""
+        updateWeather(Location(latLng.latitude, latLng.longitude))
     }
 
     private fun getCurrentLocation() {
@@ -130,11 +143,12 @@ class ActualWeatherViewModel(
     }
 }
 
-sealed class State {
-    object Empty : State()
-    class Data(
-        val currentWeather: WeatherMain,
-        val hourlyWeather: List<Time>,
-        val dailyWeather: List<DailyWeatherShort>
-    ) : State()
+    sealed class State {
+        object Empty : State()
+        class Data(
+            val currentWeather: WeatherMain,
+            val hourlyWeather: List<Time>,
+            val dailyWeather: List<DailyWeatherShort>
+        ) : State()
+    }
 }
