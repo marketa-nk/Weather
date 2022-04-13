@@ -1,6 +1,7 @@
 package com.mint.weather.di
 
 import com.mint.weather.actualweather.ActualWeatherFragment
+import com.mint.weather.network.NetworkService
 import dagger.Component
 import javax.inject.Scope
 
@@ -9,6 +10,8 @@ import javax.inject.Scope
 interface AppComponent {
 
     fun injectActualWeatherFragment(actualWeatherFragment: ActualWeatherFragment)
+
+    fun getNetworkService(): NetworkService
 }
 
 @Scope
