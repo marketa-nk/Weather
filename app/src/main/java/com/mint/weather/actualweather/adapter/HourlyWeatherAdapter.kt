@@ -10,6 +10,7 @@ import com.mint.weather.databinding.ViewHourWeatherBinding
 import com.mint.weather.model.HourWeather
 import com.mint.weather.model.Sunrise
 import com.mint.weather.model.Sunset
+import com.mint.weather.temperatureToString
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -47,9 +48,9 @@ class HourlyWeatherAdapter : ListAdapter<Any, RecyclerView.ViewHolder>(HourlyWea
     inner class SunriseViewHolder(private val binding: ViewHourWeatherBinding) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(sunrise: Sunrise) {
-            binding.time.text = SimpleDateFormat("HH:mm").format(sunrise.date)
-            binding.temp.text = "восход"
-            binding.icon.setPadding(28,28,28,28)
+            binding.time.text = SimpleDateFormat("HH:mm", Locale.getDefault()).format(sunrise.date)
+            binding.temp.setText(R.string.sunrise)
+            binding.icon.setPadding(28, 28, 28, 28)
             Glide
                 .with(binding.icon)
                 .load(R.drawable.ic_sunrise_24)
@@ -61,9 +62,9 @@ class HourlyWeatherAdapter : ListAdapter<Any, RecyclerView.ViewHolder>(HourlyWea
     inner class SunsetViewHolder(private val binding: ViewHourWeatherBinding) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(sunset: Sunset) {
-            binding.time.text = SimpleDateFormat("HH:mm").format(sunset.date)
-            binding.temp.text = "закат"
-            binding.icon.setPadding(28,28,28,28)
+            binding.time.text = SimpleDateFormat("HH:mm", Locale.getDefault()).format(sunset.date)
+            binding.temp.text = binding.root.context.getString(R.string.sunset)
+            binding.icon.setPadding(28, 28, 28, 28)
             Glide
                 .with(binding.icon)
                 .load(R.drawable.ic_sunset_24)
@@ -76,28 +77,21 @@ class HourlyWeatherAdapter : ListAdapter<Any, RecyclerView.ViewHolder>(HourlyWea
         fun bind(hourWeather: HourWeather) {
 
             binding.time.text = convertDateToString(hourWeather.date)
-            binding.temp.text = temperatureToString(hourWeather.temp)
+            binding.temp.text = hourWeather.temp.temperatureToString()
 
             Glide
                 .with(binding.icon)
-                .load("https://openweathermap.org/img/wn/${hourWeather.icon}@2x.png")
+                .load(hourWeather.iconUrl)
                 .into(binding.icon)
         }
     }
 
-    fun temperatureToString(temp: Double): String {
-        return when {
-            temp >= 1 -> "+${temp.toInt()}°C"
-            else -> "${temp.toInt()}°C"
-        }
-    }
-
     fun convertDateToString(s: Date): String {
-        val time = SimpleDateFormat("HH:mm").format(s)
+        val time = SimpleDateFormat("HH:mm", Locale.getDefault()).format(s)
         return when {
             time.equals("00:00") ->
                 """$time
-                |${SimpleDateFormat("d MMM").format(s)}""".trimMargin()
+                |${SimpleDateFormat("d MMM", Locale.getDefault()).format(s)}""".trimMargin()
             else -> time
         }
     }

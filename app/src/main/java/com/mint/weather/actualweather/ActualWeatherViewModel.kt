@@ -7,10 +7,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.mint.weather.SingleLiveEvent
 import com.mint.weather.data.CityRepository
 import com.mint.weather.data.WeatherRepository
-import com.mint.weather.model.DailyWeatherShort
-import com.mint.weather.model.Location
-import com.mint.weather.model.Time
-import com.mint.weather.model.WeatherMain
+import com.mint.weather.model.*
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
@@ -38,7 +35,6 @@ class ActualWeatherViewModel(
     private val compositeDisposable = CompositeDisposable()
 
     init {
-//        checkLocationPermissionEvent.value = Unit
         requireLocationPermissionEvent.value = Unit
     }
 
@@ -50,7 +46,7 @@ class ActualWeatherViewModel(
         }
     }
 
-    fun swipeToRefresh() {
+    fun viewSwipedToRefresh() {
         reload()
     }
 
@@ -141,7 +137,6 @@ class ActualWeatherViewModel(
             return ActualWeatherViewModel(cityRepository, weatherRepository, locationRepository) as T
         }
     }
-}
 
     sealed class State {
         object Empty : State()

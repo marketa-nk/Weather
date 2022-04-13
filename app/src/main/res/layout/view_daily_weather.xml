@@ -3,8 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@color/gray50_600">
+    android:layout_height="wrap_content">
 
     <TextView
         android:id="@+id/day_of_week"
@@ -34,8 +33,7 @@
         android:id="@+id/icon"
         android:layout_width="60dp"
         android:layout_height="60dp"
-        android:layout_marginEnd="170dp"
-        android:src="@mipmap/ic_launcher"
+        android:layout_marginEnd="180dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -54,6 +52,16 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:text="0°C" />
 
+    <ImageView
+        android:id="@+id/img_day"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:src="@drawable/ic_sunny_16"
+        app:layout_constraintBottom_toBottomOf="@id/temp_day"
+        app:layout_constraintStart_toEndOf="@id/temp_day"
+        app:layout_constraintTop_toTopOf="@id/temp_day" />
+
     <TextView
         android:id="@+id/temp_night"
         android:layout_width="wrap_content"
@@ -66,15 +74,25 @@
         app:layout_constraintTop_toBottomOf="@id/temp_day"
         tools:text="0°C" />
 
+    <ImageView
+        android:id="@+id/img_night"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:src="@drawable/ic_moon_16"
+        app:layout_constraintBottom_toBottomOf="@id/temp_night"
+        app:layout_constraintStart_toEndOf="@id/temp_night"
+        app:layout_constraintTop_toTopOf="@id/temp_night" />
+
     <TextView
         android:id="@+id/precipitation"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="12sp"
         android:layout_marginEnd="15dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:textSize="12sp"
         app:layout_constraintBottom_toTopOf="@id/wind_speed"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         tools:text="---" />
 
     <TextView

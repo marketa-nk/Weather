@@ -1,10 +1,25 @@
 <resources>
-    <string name="app_name">Weather</string>
-    <string name="city">City: </string>
-    <string name="enter">Enter city…</string>
-    <string name="lat">lat: </string>
-    <string name="lon">lon: </string>
-    <string name="send">SEND </string>
-    <string name="favorites">Избранное</string>
-    <string name="search_city">Поиск города</string>
+    <string name="app_name">Mint Weather</string>
+
+    <string name="needs_location_permission">Данному приложению требуется разрешение на местоположения</string>
+    <string name="show_location_permission">Показать диалог с запросом разрешения?</string>
+    <string name="yes">Да</string>
+    <string name="no_thanks">Нет, спасибо</string>
+
+    <string name="sunrise">восход</string>
+    <string name="sunset">закат</string>
+
+    <string name="weather_temperature">%1$s °C</string>
+    <string name="weather_feels_like">Ощущается как: %1$s°C</string>
+    <string name="weather_wind">%1$s м/с, %2$s</string>
+    <string name="weather_pressure">%1$s мм рт.ст.</string>
+    <string name="weather_humidity">%1$s%%</string>
+    <string name="error_occurred">An error occurred: %1$s</string>
+    <string name="error">Упс! Что-то пошло не так..</string>
+    <string name="empty_string">---</string>
+    <string name="precipitation_volume">%dмм</string>
+    <string name="wind_speed">%1$dм/с</string>
+    <string name="wind_speed_with_wind_gust">%1$d-%2$dм/с</string>
+
+    <string name="api_key">AIzaSyBuw5zpFxq1U6EpNlwGk8gPEHEB92XGTZA</string>
 </resources>

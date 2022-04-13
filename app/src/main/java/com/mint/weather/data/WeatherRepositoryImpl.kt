@@ -14,11 +14,13 @@ class WeatherRepositoryImpl @Inject constructor(private val networkService: Netw
     override fun getWeatherNow(location: Location): Single<Triple<WeatherMain, List<Time>, List<DailyWeatherShort>>> {
         return api.getActualWeather(location.lat, location.lon)
             .map { response ->
+                val icon = response.current.weather[0].icon
                 val weather = WeatherMain(
                     response.current.temp,
                     response.current.weather[0].description.replaceFirstChar { c -> c.uppercase() },
                     response.current.feelsLike,
-                    response.current.weather[0].icon,
+                    icon,
+                    getOpenWeatherIconUrl(icon),
                     response.current.windSpeed,
                     response.current.windDeg,
                     response.current.pressure,
@@ -31,21 +33,31 @@ class WeatherRepositoryImpl @Inject constructor(private val networkService: Netw
 
     private fun getHourlyWeather(actualWeather: ActualWeather): List<Time> {
         val now = Date()
-        val twoDays = Date(System.currentTimeMillis() + 172800000) //todo
-        val hourlyWeather = actualWeather.hourly.map { HourWeather(Date(it.dt * 1000), it.temp, it.weather[0].icon) }
-        val sunrises = actualWeather.daily.map { daily -> Sunrise(Date(daily.sunrise * 1000)) }.filter { it.date > now && it.date < twoDays }
-        val sunsets = actualWeather.daily.map { daily -> Sunset(Date(daily.sunset * 1000)) }.filter { it.date > now && it.date < twoDays }
-        val list = sunrises + sunsets + hourlyWeather
-        return list.sortedBy { it.date }
+        val hourlyWeather = actualWeather.hourly.map {
+            val icon = it.weather[0].icon
+            HourWeather(
+                date = Date(it.dt * 1000),
+                temp = it.temp,
+                icon = icon,
+                iconUrl = getOpenWeatherIconUrl(icon)
+            )
+        }
+        val twoDays = Calendar.getInstance().apply { add(Calendar.DATE, 2) }.time
+        val filterNextTwoDay: (Time) -> Boolean = { it.date > now && it.date < twoDays }
+        val sunrises = actualWeather.daily.map { daily -> Sunrise(Date(daily.sunrise * 1000)) }.filter(filterNextTwoDay)
+        val sunsets = actualWeather.daily.map { daily -> Sunset(Date(daily.sunset * 1000)) }.filter(filterNextTwoDay)
+        return (sunrises + sunsets + hourlyWeather).sortedBy { it.date }
     }
 
     private fun getDailyWeather(actualWeather: ActualWeather): List<DailyWeatherShort> {
         return actualWeather.daily.map {
+            val icon = it.weather[0].icon
             DailyWeatherShort(
                 Date(it.dt * 1000),
                 it.temp.day,
                 it.temp.night,
-                it.weather[0].icon,
+                icon,
+                getOpenWeatherIconUrl(icon),
                 it.rain,
                 it.snow,
                 it.windSpeed,

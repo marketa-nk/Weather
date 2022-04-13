@@ -32,6 +32,7 @@ import com.mint.weather.model.DailyWeatherShort
 import com.mint.weather.model.Time
 import com.mint.weather.model.WeatherMain
 import com.mint.weather.model.WindDirections
+import com.mint.weather.toUiString
 import javax.inject.Inject
 
 class ActualWeatherFragment : Fragment() {
@@ -109,16 +110,14 @@ class ActualWeatherFragment : Fragment() {
             viewModel.searchPressed()
         }
         binding.swipeRefresh.setOnRefreshListener {
-            viewModel.swipeToRefresh()
+            viewModel.viewSwipedToRefresh()
         }
-
+        binding.cityName.text = getString(R.string.app_name)
         binding.swipeRefresh.setColorSchemeResources(
-            android.R.color.holo_blue_bright,
-            android.R.color.holo_green_light,
-            android.R.color.holo_orange_light,
-            android.R.color.holo_red_light
+            R.color.blue,
+            R.color.light_blue,
+            R.color.orange_600,
         )
-
         viewModel.checkLocationPermissionEvent.observe(this.viewLifecycleOwner) {
             viewModel.permissionGranted(checkLocationPermission())
         }
@@ -147,16 +146,12 @@ class ActualWeatherFragment : Fragment() {
     private fun requireLocationPermission() {
         when {
             ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED -> {
-                // You can use the API that requires the permission.
-//                actualWeatherPresenter.permissionGranted(true)
                 viewModel.permissionGranted(true)
             }
             shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) -> {
                 showPermissionAlertDialog()
             }
             else -> {
-                // You can directly ask for the permission.
-                // The registered ActivityResultCallback gets the result of this request.
                 requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
             }
         }
@@ -164,12 +159,12 @@ class ActualWeatherFragment : Fragment() {
 
     private fun showPermissionAlertDialog() {
         AlertDialog.Builder(requireContext())
-            .setTitle("Данному приложению требуется разрешение на местоположения")
-            .setMessage("Показать диалог с запросом разрешения?")
-            .setPositiveButton("Да") { _, _ ->
+            .setTitle(getString(R.string.needs_location_permission))
+            .setMessage(getString(R.string.show_location_permission))
+            .setPositiveButton(getString(R.string.yes)) { _, _ ->
                 requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
             }
-            .setNegativeButton("Нет, спасибо") { _, _ ->
+            .setNegativeButton(getString(R.string.no_thanks)) { _, _ ->
                 viewModel.permissionGranted(false)
             }
             .create()
@@ -194,27 +189,27 @@ class ActualWeatherFragment : Fragment() {
 
     private fun showCurrentWeather(weather: WeatherMain, hourlyWeather: List<Time>, dailyWeather: List<DailyWeatherShort>) {
 
-        binding.temp.text = "${weather.temp.toInt()}°C"
-        binding.feelsLike.text = "Ощущается как: ${weather.feelsLike.toInt()}°C"
-        binding.description.text = "${weather.description.replaceFirstChar { c -> c.uppercase() }}"
+        binding.temp.text = getString(R.string.weather_temperature, weather.temp.toUiString())
+        binding.feelsLike.text = getString(R.string.weather_feels_like, weather.feelsLike.toUiString())
+        binding.description.text = weather.description.replaceFirstChar { c -> c.uppercase() }
 
         val windDirection = WindDirections.getWindDirection(weather.windDeg)
 
-        binding.windSpeed.text = "${weather.windSpeed.toInt()} м/с, ${windDirection.direction}"
-        binding.windSpeed.setCompoundDrawablesWithIntrinsicBounds(R.drawable.round_air_24, 0, windDirection.directionIcon, 0)
+        binding.windSpeed.text = getString(R.string.weather_wind, weather.windSpeed.toUiString(), windDirection.direction)
+        binding.windSpeed.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_round_air_24, 0, windDirection.directionIcon, 0)
         binding.windSpeed.compoundDrawablePadding = resources.getDimension(R.dimen.in_dp).toInt()
 
-        binding.pressure.text = "${(weather.pressure / 1.333).toInt()} мм рт.ст."
-        binding.pressure.setCompoundDrawablesWithIntrinsicBounds(R.drawable.round_speed_24, 0, 0, 0)
+        binding.pressure.text = getString(R.string.weather_pressure, (weather.pressureMM).toUiString())
+        binding.pressure.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_round_speed_24, 0, 0, 0)
         binding.pressure.compoundDrawablePadding = resources.getDimension(R.dimen.in_dp).toInt()
 
-        binding.humidity.text = "${weather.humidity}%"
-        binding.humidity.setCompoundDrawablesWithIntrinsicBounds(R.drawable.round_water_drop_24, 0, 0, 0)
+        binding.humidity.text = getString(R.string.weather_humidity, weather.humidity.toUiString())
+        binding.humidity.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_round_water_drop_24, 0, 0, 0)
         binding.humidity.compoundDrawablePadding = resources.getDimension(R.dimen.in_dp).toInt()
 
         Glide
             .with(binding.icon)
-            .load("https://openweathermap.org/img/wn/${weather.icon}@2x.png")
+            .load(weather.iconUrl)
             .into(binding.icon)
 
         hourlyWeatherAdapter.submitList(hourlyWeather)
@@ -222,20 +217,20 @@ class ActualWeatherFragment : Fragment() {
     }
 
     private fun showEmptyWeather() {
-        binding.temp.text = "---"
-        binding.feelsLike.text = "Ощущается как: ---"
-        binding.description.text = "---"
+        binding.temp.text = getString(R.string.weather_temperature, getString(R.string.empty_string))
+        binding.feelsLike.text = getString(R.string.weather_feels_like, getString(R.string.empty_string))
+        binding.description.text = getString(R.string.empty_string)
 
-        binding.windSpeed.text = "--- м/с"
-        binding.windSpeed.setCompoundDrawablesWithIntrinsicBounds(R.drawable.round_air_24, 0, 0, 0)
+        binding.windSpeed.text = getString(R.string.weather_wind, getString(R.string.empty_string), getString(R.string.empty_string))
+        binding.windSpeed.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_round_air_24, 0, 0, 0)
         binding.windSpeed.compoundDrawablePadding = resources.getDimension(R.dimen.in_dp).toInt()
 
-        binding.pressure.text = "--- мм рт.ст."
-        binding.pressure.setCompoundDrawablesWithIntrinsicBounds(R.drawable.round_speed_24, 0, 0, 0)
+        binding.pressure.text = getString(R.string.weather_pressure, getString(R.string.empty_string))
+        binding.pressure.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_round_speed_24, 0, 0, 0)
         binding.pressure.compoundDrawablePadding = resources.getDimension(R.dimen.in_dp).toInt()
 
-        binding.humidity.text = "---%"
-        binding.humidity.setCompoundDrawablesWithIntrinsicBounds(R.drawable.round_water_drop_24, 0, 0, 0)
+        binding.humidity.text = getString(R.string.weather_humidity, getString(R.string.empty_string))
+        binding.humidity.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_round_water_drop_24, 0, 0, 0)
         binding.humidity.compoundDrawablePadding = resources.getDimension(R.dimen.in_dp).toInt()
 
         Glide
@@ -244,6 +239,11 @@ class ActualWeatherFragment : Fragment() {
 
         hourlyWeatherAdapter.submitList(emptyList())
         dailyWeatherAdapter.submitList(emptyList())
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }
 
