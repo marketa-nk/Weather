@@ -7,7 +7,7 @@ import io.reactivex.Single
 import java.util.*
 import javax.inject.Inject
 
-class WeatherRepositoryImpl @Inject constructor(private val networkService: NetworkService) : WeatherRepository {
+class WeatherRepositoryImpl @Inject constructor(networkService: NetworkService) : WeatherRepository {
 
     private val api = networkService.openWeatherApi
 
@@ -32,20 +32,21 @@ class WeatherRepositoryImpl @Inject constructor(private val networkService: Netw
 
 
     private fun getHourlyWeather(actualWeather: ActualWeather): List<Time> {
-        val now = Date()
+        val timezoneDiff = actualWeather.timezoneOffset * 1000 - Calendar.getInstance().timeZone.rawOffset //millisec
+        val now = Date(Date().time + timezoneDiff)
         val hourlyWeather = actualWeather.hourly.map {
             val icon = it.weather[0].icon
             HourWeather(
-                date = Date(it.dt * 1000),
+                date = Date(it.dt * 1000 + timezoneDiff),
                 temp = it.temp,
                 icon = icon,
-                iconUrl = getOpenWeatherIconUrl(icon)
+                iconUrl = getOpenWeatherIconUrl(icon),
             )
         }
         val twoDays = Calendar.getInstance().apply { add(Calendar.DATE, 2) }.time
         val filterNextTwoDay: (Time) -> Boolean = { it.date > now && it.date < twoDays }
-        val sunrises = actualWeather.daily.map { daily -> Sunrise(Date(daily.sunrise * 1000)) }.filter(filterNextTwoDay)
-        val sunsets = actualWeather.daily.map { daily -> Sunset(Date(daily.sunset * 1000)) }.filter(filterNextTwoDay)
+        val sunrises = actualWeather.daily.map { daily -> Sunrise(Date(daily.sunrise * 1000 + timezoneDiff)) }.filter(filterNextTwoDay)
+        val sunsets = actualWeather.daily.map { daily -> Sunset(Date(daily.sunset * 1000 + timezoneDiff)) }.filter(filterNextTwoDay)
         return (sunrises + sunsets + hourlyWeather).sortedBy { it.date }
     }
 
