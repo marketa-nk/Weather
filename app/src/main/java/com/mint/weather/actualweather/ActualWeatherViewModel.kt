@@ -57,6 +57,7 @@ class ActualWeatherViewModel(
             updateWeather(location)
             updateCity(location)
         } else {
+            showProgress.value = false
             showWeather.value = State.Empty
             cityName.value = ""
         }

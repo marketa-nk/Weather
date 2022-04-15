@@ -24,8 +24,8 @@ import javax.net.ssl.X509TrustManager
 
 class NetworkService @Inject constructor(context: Context) {
 
-    val googleMapsApi: GoogleMapsApi = getApi(GoogleMapsApi::class.java, "https://maps.googleapis.com/maps/api/geocode/", QueryInterceptor("key", context.resources.getString(R.string.api_key)))
-    val openWeatherApi: OpenWeatherApi = getApi(OpenWeatherApi::class.java, "https://api.openweathermap.org/", QueryInterceptor("appid", "b7044fa387aaefecbb6a8888f3624867"))
+    val googleMapsApi: GoogleMapsApi = getApi(GoogleMapsApi::class.java, "https://maps.googleapis.com/maps/api/geocode/", QueryInterceptor("key", context.resources.getString(R.string.api_key_google)))
+    val openWeatherApi: OpenWeatherApi = getApi(OpenWeatherApi::class.java, "https://api.openweathermap.org/", QueryInterceptor("appid", context.resources.getString(R.string.api_key_open_weather)))
 
     private fun <T> getApi(clazz: Class<T>, url: String, vararg interceptors: Interceptor): T {
 

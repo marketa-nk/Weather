@@ -212,7 +212,10 @@ class ActualWeatherFragment : Fragment() {
             .load(weather.iconUrl)
             .into(binding.icon)
 
-        hourlyWeatherAdapter.submitList(hourlyWeather)
+        hourlyWeatherAdapter.submitList(hourlyWeather){
+            binding.hourlyWeatherRecyclerView.scrollToPosition(0)
+        }
+
         dailyWeatherAdapter.submitList(dailyWeather)
     }
 

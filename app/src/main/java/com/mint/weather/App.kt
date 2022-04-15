@@ -20,7 +20,7 @@ class App : Application() {
         instance = this
 
         if (!Places.isInitialized()) {
-            Places.initialize(applicationContext, getString(R.string.api_key))
+            Places.initialize(applicationContext, getString(R.string.api_key_google))
         }
     }
 
