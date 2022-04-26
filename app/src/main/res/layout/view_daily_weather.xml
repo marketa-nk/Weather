@@ -38,51 +38,27 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
+    <com.mint.weather.actualweather.DayNightTemperatureView
         android:id="@+id/temp_day"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="110dp"
         android:layout_marginTop="15dp"
-        android:layout_marginEnd="130dp"
-        android:layout_marginBottom="3dp"
-        android:textSize="16sp"
-        android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@id/temp_night"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="0°C" />
+        />
 
-    <ImageView
-        android:id="@+id/img_day"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="4dp"
-        android:src="@drawable/ic_sunny_16"
-        app:layout_constraintBottom_toBottomOf="@id/temp_day"
-        app:layout_constraintStart_toEndOf="@id/temp_day"
-        app:layout_constraintTop_toTopOf="@id/temp_day" />
-
-    <TextView
+    <com.mint.weather.actualweather.DayNightTemperatureView
         android:id="@+id/temp_night"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="130dp"
+        android:layout_marginEnd="110dp"
         android:layout_marginBottom="15dp"
-        android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/temp_day"
-        tools:text="0°C" />
-
-    <ImageView
-        android:id="@+id/img_night"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="5dp"
-        android:src="@drawable/ic_moon_16"
-        app:layout_constraintBottom_toBottomOf="@id/temp_night"
-        app:layout_constraintStart_toEndOf="@id/temp_night"
-        app:layout_constraintTop_toTopOf="@id/temp_night" />
+        />
 
     <TextView
         android:id="@+id/precipitation"

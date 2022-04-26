@@ -39,8 +39,8 @@ class DailyWeatherAdapter : ListAdapter<DailyWeatherShort, DailyWeatherAdapter.D
 
             binding.dayOfWeek.text = SimpleDateFormat("EEE", Locale.getDefault()).format(dailyWeatherShort.date)
             binding.date.text = SimpleDateFormat("d MMMM", Locale.getDefault()).format(dailyWeatherShort.date)
-            binding.tempDay.text = dailyWeatherShort.tempDay.temperatureToString()
-            binding.tempNight.text = dailyWeatherShort.tempNight.temperatureToString()
+            binding.tempDay.setDayTemperature(dailyWeatherShort.tempDay)
+            binding.tempNight.setNightTemperature(dailyWeatherShort.tempNight)
 
             setPrecipitationData(dailyWeatherShort)
             setWindData(dailyWeatherShort.windSpeed, dailyWeatherShort.windGust, dailyWeatherShort.windDirection)
