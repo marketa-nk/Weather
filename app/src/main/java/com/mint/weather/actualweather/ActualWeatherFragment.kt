@@ -12,6 +12,7 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -24,6 +25,7 @@ import com.google.android.libraries.places.widget.AutocompleteActivity
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
 import com.google.android.material.appbar.AppBarLayout
 import com.mint.weather.App
+import com.mint.weather.IntroView
 import com.mint.weather.R
 import com.mint.weather.actualweather.adapter.DailyWeatherAdapter
 import com.mint.weather.actualweather.adapter.HourlyWeatherAdapter
@@ -139,6 +141,9 @@ class ActualWeatherFragment : Fragment() {
         viewModel.showFindCitiesScreen.observe(this.viewLifecycleOwner) {
             launchFindCitiesActivity()
         }
+        viewModel.showIntroView.observe(this.viewLifecycleOwner){
+            showIntroView()
+        }
 
         return binding.root
     }
@@ -242,6 +247,13 @@ class ActualWeatherFragment : Fragment() {
 
         hourlyWeatherAdapter.submitList(emptyList())
         dailyWeatherAdapter.submitList(emptyList())
+    }
+
+    private fun showIntroView() {
+        val introView = IntroView(requireContext()).apply {
+            layoutParams = CoordinatorLayout.LayoutParams(CoordinatorLayout.LayoutParams.MATCH_PARENT, CoordinatorLayout.LayoutParams.MATCH_PARENT)
+        }
+        binding.coordinatorLayout.addView(introView)
     }
 
     override fun onDestroyView() {

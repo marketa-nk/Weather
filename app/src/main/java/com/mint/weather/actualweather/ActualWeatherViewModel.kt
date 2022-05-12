@@ -32,10 +32,13 @@ class ActualWeatherViewModel(
 
     val requireLocationPermissionEvent: SingleLiveEvent<Unit> by lazy { SingleLiveEvent() }
 
+    val showIntroView: SingleLiveEvent<Unit> by lazy { SingleLiveEvent() }
+
     private val compositeDisposable = CompositeDisposable()
 
     init {
         requireLocationPermissionEvent.value = Unit
+        showIntroView.value = Unit
     }
 
     fun permissionGranted(granted: Boolean) {
