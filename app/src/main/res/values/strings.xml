@@ -23,4 +23,7 @@
 
     <string name="api_key_google">AIzaSyBuw5zpFxq1U6EpNlwGk8gPEHEB92XGTZA</string>
     <string name="api_key_open_weather">b7044fa387aaefecbb6a8888f3624867</string>
+    <string name="add_or_remove_favorites">Кнопка добавления или удаления города из избранного</string>
+    <string name="search_city_button">Кнопка поиска города</string>
+    <string name="icon_of_current_weather">Иконка текущей погоды</string>
 </resources>

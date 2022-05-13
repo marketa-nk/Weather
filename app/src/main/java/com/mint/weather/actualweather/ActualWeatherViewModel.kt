@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.gms.maps.model.LatLng
 import com.mint.weather.SingleLiveEvent
+import com.mint.weather.actualweather.database.DataBaseRepository
 import com.mint.weather.data.CityRepository
 import com.mint.weather.data.WeatherRepository
 import com.mint.weather.model.*
@@ -17,10 +18,13 @@ import javax.inject.Inject
 class ActualWeatherViewModel(
     private val cityRepository: CityRepository,
     private val weatherRepository: WeatherRepository,
-    private val locationRepository: LocationRepository
+    private val locationRepository: LocationRepository,
+    private val dataBaseRepository: DataBaseRepository,
 ) : ViewModel() {
 
     private var location: Location? = null
+
+    private var currentCity: CurrentCity? = null
 
     val showProgress: MutableLiveData<Boolean> by lazy { MutableLiveData<Boolean>(false) }
     val checkLocationPermissionEvent: SingleLiveEvent<Unit> by lazy { SingleLiveEvent<Unit>() }
@@ -31,6 +35,8 @@ class ActualWeatherViewModel(
     val showWeather: MutableLiveData<State> by lazy { MutableLiveData<State>() }
 
     val requireLocationPermissionEvent: SingleLiveEvent<Unit> by lazy { SingleLiveEvent() }
+
+    val fillTheFavoriteStar: MutableLiveData<Boolean?> by lazy { MutableLiveData<Boolean?>() }
 
     private val compositeDisposable = CompositeDisposable()
 
@@ -52,6 +58,8 @@ class ActualWeatherViewModel(
 
     private fun reload() {
         val location = location
+        fillTheFavoriteStar.value = null
+        currentCity = null
         if (location != null) {
             showProgress.value = true
             updateWeather(location)
@@ -67,10 +75,26 @@ class ActualWeatherViewModel(
         showFindCitiesScreen.value = Unit
     }
 
-    fun cityIsSelected(name: String?, latLng: LatLng) {
+    fun cityIsSelected(cityId: String, name: String?, latLng: LatLng) {
         showProgress.value = true
-        cityName.value = name ?: ""
-        updateWeather(Location(latLng.latitude, latLng.longitude))
+        val selectedCity = CurrentCity(cityId, name ?: "", latLng.latitude, latLng.longitude)
+        cityName.value = selectedCity.name
+        fillOrNotFavoriteStar(selectedCity.cityId)
+        updateWeather(Location(selectedCity.lat, selectedCity.lng))
+        currentCity = selectedCity
+    }
+
+
+    private fun fillOrNotFavoriteStar(cityId: String) {
+        dataBaseRepository.isFavoriteCity(cityId)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({
+                fillTheFavoriteStar.value = it
+            }, {
+                it.printStackTrace()
+            })
+            .addDisposable()
     }
 
     private fun getCurrentLocation() {
@@ -117,6 +141,31 @@ class ActualWeatherViewModel(
             .addDisposable()
     }
 
+    fun favoriteBtnPressed() {
+        val city = currentCity
+        if (city != null) {
+            val favoriteCity = FavoriteCity(city.cityId, city.name, city.lat, city.lng)
+            dataBaseRepository.isFavoriteCity(city.cityId)
+                .flatMap { favorite ->
+                    if (favorite) {
+                        dataBaseRepository.deleteCityFromFavorites(favoriteCity)
+                    } else {
+                        dataBaseRepository.saveCityToFavorites(favoriteCity)
+                    }
+                }
+                .ignoreElement()
+                .andThen(dataBaseRepository.isFavoriteCity(city.cityId))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({
+                    fillTheFavoriteStar.value = it
+                }, {
+                    it.printStackTrace()
+                })
+                .addDisposable()
+        }
+    }
+
     private fun Disposable.addDisposable() {
         compositeDisposable.add(this)
     }
@@ -129,13 +178,14 @@ class ActualWeatherViewModel(
     class ActualWeatherViewModelFactory @Inject constructor(
         private val cityRepository: CityRepository,
         private val weatherRepository: WeatherRepository,
-        private val locationRepository: LocationRepository
+        private val locationRepository: LocationRepository,
+        private val dataBaseRepository: DataBaseRepository,
     ) : ViewModelProvider.Factory {
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             require(modelClass == ActualWeatherViewModel::class.java)
-            return ActualWeatherViewModel(cityRepository, weatherRepository, locationRepository) as T
+            return ActualWeatherViewModel(cityRepository, weatherRepository, locationRepository, dataBaseRepository) as T
         }
     }
 
@@ -144,7 +194,7 @@ class ActualWeatherViewModel(
         class Data(
             val currentWeather: WeatherMain,
             val hourlyWeather: List<Time>,
-            val dailyWeather: List<DailyWeatherShort>
+            val dailyWeather: List<DailyWeatherShort>,
         ) : State()
     }
 }

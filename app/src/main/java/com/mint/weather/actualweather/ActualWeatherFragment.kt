@@ -28,10 +28,7 @@ import com.mint.weather.R
 import com.mint.weather.actualweather.adapter.DailyWeatherAdapter
 import com.mint.weather.actualweather.adapter.HourlyWeatherAdapter
 import com.mint.weather.databinding.FragmentActualWeatherBinding
-import com.mint.weather.model.DailyWeatherShort
-import com.mint.weather.model.Time
-import com.mint.weather.model.WeatherMain
-import com.mint.weather.model.WindDirections
+import com.mint.weather.model.*
 import com.mint.weather.toUiString
 import javax.inject.Inject
 
@@ -58,8 +55,9 @@ class ActualWeatherFragment : Fragment() {
                     val place = Autocomplete.getPlaceFromIntent(data)
                     val name = place.name
                     val latLng = place.latLng
-                    if (latLng != null) {
-                        viewModel.cityIsSelected(name, latLng)
+                    val cityId = place.id
+                    if (latLng != null && cityId != null) {
+                        viewModel.cityIsSelected(cityId, name, latLng)
                     } else {
                         Toast.makeText(requireContext(), getString(R.string.error), Toast.LENGTH_SHORT).show()
                     }
@@ -94,7 +92,7 @@ class ActualWeatherFragment : Fragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         _binding = FragmentActualWeatherBinding.inflate(inflater, container, false)
 
@@ -118,6 +116,9 @@ class ActualWeatherFragment : Fragment() {
             R.color.light_blue,
             R.color.orange_600,
         )
+        binding.btnFavorites.setOnClickListener {
+            viewModel.favoriteBtnPressed()
+        }
         viewModel.checkLocationPermissionEvent.observe(this.viewLifecycleOwner) {
             viewModel.permissionGranted(checkLocationPermission())
         }
@@ -138,6 +139,9 @@ class ActualWeatherFragment : Fragment() {
         }
         viewModel.showFindCitiesScreen.observe(this.viewLifecycleOwner) {
             launchFindCitiesActivity()
+        }
+        viewModel.fillTheFavoriteStar.observe(this.viewLifecycleOwner) { show ->
+            showFavoriteStar(show)
         }
 
         return binding.root
@@ -176,7 +180,7 @@ class ActualWeatherFragment : Fragment() {
     }
 
     private fun launchFindCitiesActivity() {
-        val fields = listOf(Place.Field.NAME, Place.Field.LAT_LNG)
+        val fields = listOf(Place.Field.NAME, Place.Field.LAT_LNG, Place.Field.ID)
         val intent = Autocomplete.IntentBuilder(AutocompleteActivityMode.OVERLAY, fields)
             .setTypeFilter(TypeFilter.CITIES)
             .build(requireContext())
@@ -212,7 +216,7 @@ class ActualWeatherFragment : Fragment() {
             .load(weather.iconUrl)
             .into(binding.icon)
 
-        hourlyWeatherAdapter.submitList(hourlyWeather){
+        hourlyWeatherAdapter.submitList(hourlyWeather) {
             binding.hourlyWeatherRecyclerView.scrollToPosition(0)
         }
 
@@ -242,6 +246,23 @@ class ActualWeatherFragment : Fragment() {
 
         hourlyWeatherAdapter.submitList(emptyList())
         dailyWeatherAdapter.submitList(emptyList())
+    }
+
+    private fun showFavoriteStar(show: Boolean?) {
+        if (show == null) {
+            binding.btnFavorites.visibility = View.INVISIBLE
+        } else {
+            binding.btnFavorites.visibility = View.VISIBLE
+            setStarImageSource(show)
+        }
+    }
+
+    private fun setStarImageSource(show: Boolean) {
+        if (show) {
+            binding.btnFavorites.setImageResource(R.drawable.ic_round_star_24)
+        } else {
+            binding.btnFavorites.setImageResource(R.drawable.ic_round_star_border_24)
+        }
     }
 
     override fun onDestroyView() {

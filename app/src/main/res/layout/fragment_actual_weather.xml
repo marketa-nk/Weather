@@ -63,7 +63,8 @@
                             android:layout_height="64dp"
                             app:layout_constraintBottom_toBottomOf="@id/temp"
                             app:layout_constraintStart_toEndOf="@id/temp"
-                            app:layout_constraintTop_toTopOf="@id/temp" />
+                            app:layout_constraintTop_toTopOf="@id/temp"
+                            android:contentDescription="@string/icon_of_current_weather" />
 
                         <TextView
                             android:id="@+id/description"
@@ -159,21 +160,34 @@
                             android:src="@drawable/ic_round_search_24"
                             app:layout_constraintBottom_toBottomOf="@id/city_name"
                             app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="@id/city_name" />
+                            app:layout_constraintTop_toTopOf="@id/city_name"
+                            android:contentDescription="@string/search_city_button" />
 
                         <TextView
                             android:id="@+id/city_name"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginEnd="52dp"
                             android:gravity="center"
                             android:textSize="18sp"
                             android:textStyle="bold"
                             app:layout_constrainedWidth="true"
                             app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintEnd_toStartOf="@id/btn_favorites"
                             app:layout_constraintStart_toEndOf="@id/btn_search"
                             app:layout_constraintTop_toTopOf="parent" />
+
+                        <ImageView
+                            android:id="@+id/btn_favorites"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="8dp"
+                            android:padding="8dp"
+                            android:visibility="invisible"
+                            android:src="@drawable/ic_round_star_border_24"
+                            app:layout_constraintBottom_toBottomOf="@id/city_name"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="@id/city_name"
+                            android:contentDescription="@string/add_or_remove_favorites" />
 
 
                     </androidx.constraintlayout.widget.ConstraintLayout>

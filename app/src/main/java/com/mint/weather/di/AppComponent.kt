@@ -6,7 +6,7 @@ import dagger.Component
 import javax.inject.Scope
 
 @AppScope
-@Component(modules = [Module::class, ContextModule::class])
+@Component(modules = [Module::class, ContextModule::class, DatabaseModule::class])
 interface AppComponent {
 
     fun injectActualWeatherFragment(actualWeatherFragment: ActualWeatherFragment)

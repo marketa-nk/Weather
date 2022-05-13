@@ -5,6 +5,7 @@ import com.google.android.libraries.places.api.Places
 import com.mint.weather.di.AppComponent
 import com.mint.weather.di.ContextModule
 import com.mint.weather.di.DaggerAppComponent
+import com.mint.weather.di.DatabaseModule
 
 class App : Application() {
 
@@ -15,6 +16,7 @@ class App : Application() {
 
         appComponent = DaggerAppComponent.builder()
             .contextModule(ContextModule(this))
+            .databaseModule(DatabaseModule(this))
             .build()
 
         instance = this
