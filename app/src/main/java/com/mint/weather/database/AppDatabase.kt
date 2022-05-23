@@ -1,4 +1,4 @@
-package com.mint.weather.actualweather.database
+package com.mint.weather.database
 
 import androidx.room.Database
 import androidx.room.RoomDatabase

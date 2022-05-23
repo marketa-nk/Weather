@@ -1,6 +1,6 @@
 package com.mint.weather.actualweather
 
-import com.mint.weather.model.Location
+import android.location.Location
 import io.reactivex.Observable
 import io.reactivex.Single
 

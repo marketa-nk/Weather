@@ -8,5 +8,14 @@
         android:id="@+id/actualWeatherFragment"
         android:name="com.mint.weather.actualweather.ActualWeatherFragment"
         android:label="fragment_actual_weather"
-        tools:layout="@layout/fragment_actual_weather" />
+        tools:layout="@layout/fragment_actual_weather" >
+        <action
+            android:id="@+id/action_actualWeatherFragment_to_favoritesFragment"
+            app:destination="@id/favoritesFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/favoritesFragment"
+        android:name="com.mint.weather.favorites.FavoritesFragment"
+        android:label="FavoritesFragment"
+        tools:layout="@layout/fragment_favorites"/>
 </navigation>

@@ -1,9 +1,12 @@
 package com.mint.weather.data
 
+import android.location.Location
 import com.mint.weather.model.*
 import com.mint.weather.network.NetworkService
 import com.mint.weather.network.openweather.ActualWeather
+import io.reactivex.Observable
 import io.reactivex.Single
+import io.reactivex.schedulers.Schedulers
 import java.util.*
 import javax.inject.Inject
 
@@ -12,15 +15,13 @@ class WeatherRepositoryImpl @Inject constructor(networkService: NetworkService) 
     private val api = networkService.openWeatherApi
 
     override fun getWeatherNow(location: Location): Single<Triple<WeatherMain, List<Time>, List<DailyWeatherShort>>> {
-        return api.getActualWeather(location.lat, location.lon)
+        return api.getActualWeather(location.latitude, location.longitude)
             .map { response ->
-                val icon = response.current.weather[0].icon
                 val weather = WeatherMain(
                     response.current.temp,
                     response.current.weather[0].description.replaceFirstChar { c -> c.uppercase() },
                     response.current.feelsLike,
-                    icon,
-                    getOpenWeatherIconUrl(icon),
+                    response.current.weather[0].icon,
                     response.current.windSpeed,
                     response.current.windDeg,
                     response.current.pressure,
@@ -66,5 +67,63 @@ class WeatherRepositoryImpl @Inject constructor(networkService: NetworkService) 
                 it.windGust
             )
         }
+    }
+
+    override fun getCurrentCityWeather(location: Location): Single<CityWeatherShort> {
+        return api.getActualWeather(location.latitude, location.longitude)
+            .map { response ->
+                val icon = response.current.weather[0].icon
+                CityWeatherShort(response.current.temp, getOpenWeatherIconUrl(icon))
+            }
+    }
+
+    override fun getCitiesWeather(cityList: List<FavoriteCity>, currentLocation: Location): Observable<List<CityWeatherLong>> {
+        return Observable.fromIterable(cityList)
+            .concatMapSingle { city ->
+                getCityWeather(city, currentLocation)
+                    .subscribeOn(Schedulers.io())
+            }
+            .toList()
+            .toObservable()
+    }
+
+    private fun getCityWeather(favoriteCity: FavoriteCity, currentLocation: Location): Single<CityWeatherLong> {
+        return api.getActualWeather(favoriteCity.lat, favoriteCity.lng)
+            .map { response ->
+                val timezoneDiff = response.timezoneOffset * 1000 - Calendar.getInstance().timeZone.rawOffset //millisec
+                val icon = response.current.weather[0].icon
+                val cityLocation = Location("loc").also {
+                    it.latitude = favoriteCity.lat
+                    it.longitude = favoriteCity.lng
+                }
+                CityWeatherLong(
+                    favoriteCity.cityId,
+                    favoriteCity.name,
+                    favoriteCity.lat,
+                    favoriteCity.lng,
+                    Date(response.current.dt * 1000 + timezoneDiff),
+                    response.timezoneOffset,
+                    response.current.temp,
+                    getOpenWeatherIconUrl(icon),
+                    cityLocation.distanceToInKm(currentLocation)
+                )
+            }
+    }
+
+    private fun Location.distanceToInKm(loc: Location): Double {
+        return this.distanceToInM(loc) / 1000
+    }
+
+    private fun Location.distanceToInM(loc: Location): Double {
+        val location1 = Location("loc")
+            .also {
+                it.latitude = this.latitude
+                it.longitude = this.longitude
+            }
+        val location2 = Location("loc").also {
+            latitude = loc.latitude
+            longitude = loc.longitude
+        }
+        return location1.distanceTo(location2).toDouble()
     }
 }

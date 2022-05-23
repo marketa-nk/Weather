@@ -2,12 +2,12 @@ package com.mint.weather.actualweather
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.location.Location
 import android.os.Looper
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
-import com.mint.weather.model.Location
 import io.reactivex.Observable
 import io.reactivex.Single
 import javax.inject.Inject
@@ -27,9 +27,12 @@ class LocationService @Inject constructor(context: Context) : LocationRepository
             val callback = object : LocationCallback() {
                 override fun onLocationResult(locationResult: LocationResult?) {
                     super.onLocationResult(locationResult)
-                    val location: android.location.Location? = locationResult?.lastLocation
+                    val location: Location? = locationResult?.lastLocation
                     if (location != null) {
-                        emitter.onNext(Location(location.latitude, location.longitude))
+                        emitter.onNext(Location("loc").also {
+                            it.latitude = location.latitude
+                            it.longitude = location.longitude
+                        })
                     }
                 }
             }
@@ -46,7 +49,10 @@ class LocationService @Inject constructor(context: Context) : LocationRepository
         return Single.create { emitter ->
             fusedLocationProvider.lastLocation?.addOnSuccessListener { location ->
                 if (location != null) {
-                    emitter.onSuccess(Location(location.latitude, location.longitude))
+                    emitter.onSuccess(Location("loc").also {
+                        it.latitude = location.latitude
+                        it.longitude = location.longitude
+                    })
                 }
             }
         }

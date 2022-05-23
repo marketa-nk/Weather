@@ -1,6 +1,7 @@
-package com.mint.weather.actualweather.database
+package com.mint.weather.database
 
 import com.mint.weather.model.FavoriteCity
+import io.reactivex.Observable
 import io.reactivex.Single
 import javax.inject.Inject
 
@@ -16,7 +17,7 @@ class DataBaseRepositoryImpl @Inject constructor(
         return favoriteCitiesDao.deleteCity(favoriteCity)
     }
 
-    override fun getAllCitiesFromFavorites(): Single<List<FavoriteCity>> {
+    override fun getAllCitiesFromFavorites(): Observable<List<FavoriteCity>> {
         return favoriteCitiesDao.getAll()
     }
 

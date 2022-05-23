@@ -6,6 +6,15 @@ fun Double.toUiString(): String {
     return this.roundToInt().toString()
 }
 
+fun Double.toUiStringPlusMinus(): String {
+    val str = this.roundToInt().toString()
+    return if (this > 0) {
+        "+$str"
+    } else {
+        str
+    }
+}
+
 fun Long.toUiString(): String {
     return this.toDouble().roundToInt().toString()
 }

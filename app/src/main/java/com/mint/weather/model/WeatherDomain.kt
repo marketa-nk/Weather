@@ -28,13 +28,13 @@ data class WeatherMain(
     val description: String,
     val feelsLike: Double,
     val icon: String,
-    val iconUrl: String,
     val windSpeed: Double,
     val windDeg: Long,
     val pressure: Long,
     val humidity: Long,
 ) {
     val pressureMM = pressure / 1.333
+    val iconUrl: String = getOpenWeatherIconUrl(icon)
 }
 
 interface Time {

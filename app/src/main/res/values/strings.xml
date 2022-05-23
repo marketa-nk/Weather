@@ -26,4 +26,13 @@
     <string name="add_or_remove_favorites">Кнопка добавления или удаления города из избранного</string>
     <string name="search_city_button">Кнопка поиска города</string>
     <string name="icon_of_current_weather">Иконка текущей погоды</string>
+
+    <string name="favorites">Избранное</string>
+    <string name="time">00:00</string>
+    <string name="city_name">Город</string>
+    <string name="deg_c">%1$s°</string>
+    <string name="distanceInKm">%1$s км</string>
+    <string name="current_location"> Текущее место</string>
+    <string name="something_went_wrong">Упс! Что-то пошло не так…</string>
+
 </resources>

@@ -1,9 +1,8 @@
 package com.mint.weather.data
 
+import android.location.Location
 import com.mint.weather.model.City
-import com.mint.weather.model.Location
 
-import io.reactivex.Observable
 import io.reactivex.Single
 
 interface CityRepository {

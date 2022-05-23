@@ -2,8 +2,7 @@
 <com.mint.weather.MySwipeToRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/swipeRefresh"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/gray50_600">
+    android:layout_height="match_parent">
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
@@ -61,10 +60,10 @@
                             android:id="@+id/icon"
                             android:layout_width="64dp"
                             android:layout_height="64dp"
+                            android:contentDescription="@string/icon_of_current_weather"
                             app:layout_constraintBottom_toBottomOf="@id/temp"
                             app:layout_constraintStart_toEndOf="@id/temp"
-                            app:layout_constraintTop_toTopOf="@id/temp"
-                            android:contentDescription="@string/icon_of_current_weather" />
+                            app:layout_constraintTop_toTopOf="@id/temp" />
 
                         <TextView
                             android:id="@+id/description"
@@ -156,12 +155,12 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="8dp"
+                            android:contentDescription="@string/search_city_button"
                             android:padding="8dp"
                             android:src="@drawable/ic_round_search_24"
                             app:layout_constraintBottom_toBottomOf="@id/city_name"
                             app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="@id/city_name"
-                            android:contentDescription="@string/search_city_button" />
+                            app:layout_constraintTop_toTopOf="@id/city_name" />
 
                         <TextView
                             android:id="@+id/city_name"
@@ -172,23 +171,35 @@
                             android:textStyle="bold"
                             app:layout_constrainedWidth="true"
                             app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toStartOf="@id/btn_favorites"
+                            app:layout_constraintEnd_toStartOf="@id/btn_favorites_star"
                             app:layout_constraintStart_toEndOf="@id/btn_search"
                             app:layout_constraintTop_toTopOf="parent" />
 
                         <ImageView
-                            android:id="@+id/btn_favorites"
+                            android:id="@+id/btn_favorites_star"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginEnd="8dp"
+                            android:contentDescription="@string/add_or_remove_favorites"
                             android:padding="8dp"
+                            android:src="@drawable/ic_round_star_border_32"
                             android:visibility="invisible"
-                            android:src="@drawable/ic_round_star_border_24"
                             app:layout_constraintBottom_toBottomOf="@id/city_name"
                             app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintTop_toTopOf="@id/city_name"
-                            android:contentDescription="@string/add_or_remove_favorites" />
+                            app:layout_constraintTop_toTopOf="@id/city_name" />
 
+                        <ImageView
+                            android:id="@+id/btn_go_to_favorites_fragment"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="8dp"
+                            android:contentDescription="@string/add_or_remove_favorites"
+                            android:padding="8dp"
+                            android:src="@drawable/ic_round_menu_28"
+                            android:visibility="visible"
+                            app:layout_constraintBottom_toBottomOf="@id/city_name"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="@id/city_name" />
 
                     </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -1,13 +1,14 @@
 package com.mint.weather.actualweather
 
+import android.location.Location
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.gms.maps.model.LatLng
 import com.mint.weather.SingleLiveEvent
-import com.mint.weather.actualweather.database.DataBaseRepository
 import com.mint.weather.data.CityRepository
 import com.mint.weather.data.WeatherRepository
+import com.mint.weather.database.DataBaseRepository
 import com.mint.weather.model.*
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -37,6 +38,8 @@ class ActualWeatherViewModel(
     val requireLocationPermissionEvent: SingleLiveEvent<Unit> by lazy { SingleLiveEvent() }
 
     val fillTheFavoriteStar: MutableLiveData<Boolean?> by lazy { MutableLiveData<Boolean?>() }
+
+    val showFavoriteFragment: SingleLiveEvent<Location?> by lazy { SingleLiveEvent<Location?>() }
 
     private val compositeDisposable = CompositeDisposable()
 
@@ -80,7 +83,10 @@ class ActualWeatherViewModel(
         val selectedCity = CurrentCity(cityId, name ?: "", latLng.latitude, latLng.longitude)
         cityName.value = selectedCity.name
         fillOrNotFavoriteStar(selectedCity.cityId)
-        updateWeather(Location(selectedCity.lat, selectedCity.lng))
+        updateWeather(Location("loc").also {
+            it.latitude = selectedCity.lat
+            it.longitude = selectedCity.lng
+        })
         currentCity = selectedCity
     }
 
@@ -173,6 +179,10 @@ class ActualWeatherViewModel(
     override fun onCleared() {
         compositeDisposable.dispose()
         super.onCleared()
+    }
+
+    fun btnGoToFavoritesFragmentPressed() {
+        showFavoriteFragment.value = location
     }
 
     class ActualWeatherViewModelFactory @Inject constructor(

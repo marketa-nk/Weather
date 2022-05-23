@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.location.Location
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -13,8 +14,10 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.google.android.libraries.places.api.model.Place
@@ -107,6 +110,9 @@ class ActualWeatherFragment : Fragment() {
         binding.btnSearch.setOnClickListener {
             viewModel.searchPressed()
         }
+        binding.btnGoToFavoritesFragment.setOnClickListener {
+            viewModel.btnGoToFavoritesFragmentPressed()
+        }
         binding.swipeRefresh.setOnRefreshListener {
             viewModel.viewSwipedToRefresh()
         }
@@ -116,7 +122,7 @@ class ActualWeatherFragment : Fragment() {
             R.color.light_blue,
             R.color.orange_600,
         )
-        binding.btnFavorites.setOnClickListener {
+        binding.btnFavoritesStar.setOnClickListener {
             viewModel.favoriteBtnPressed()
         }
         viewModel.checkLocationPermissionEvent.observe(this.viewLifecycleOwner) {
@@ -142,6 +148,9 @@ class ActualWeatherFragment : Fragment() {
         }
         viewModel.fillTheFavoriteStar.observe(this.viewLifecycleOwner) { show ->
             showFavoriteStar(show)
+        }
+        viewModel.showFavoriteFragment.observe(this.viewLifecycleOwner){ location ->
+            showFavoriteFragment(location)
         }
 
         return binding.root
@@ -187,6 +196,13 @@ class ActualWeatherFragment : Fragment() {
         findCitiesResultLauncher.launch(intent)
     }
 
+    private fun showFavoriteFragment(location: Location?) {
+        binding.root.findNavController().navigate(
+            R.id.action_actualWeatherFragment_to_favoritesFragment,
+            bundleOf(ARG_LOCATION to location)
+        )
+    }
+
     private fun setCityName(city: String) {
         binding.cityName.text = city
     }
@@ -208,7 +224,7 @@ class ActualWeatherFragment : Fragment() {
         binding.pressure.compoundDrawablePadding = resources.getDimension(R.dimen.in_dp).toInt()
 
         binding.humidity.text = getString(R.string.weather_humidity, weather.humidity.toUiString())
-        binding.humidity.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_round_water_drop_24, 0, 0, 0)
+        binding.humidity.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_round_water_drop_16, 0, 0, 0)
         binding.humidity.compoundDrawablePadding = resources.getDimension(R.dimen.in_dp).toInt()
 
         Glide
@@ -237,7 +253,7 @@ class ActualWeatherFragment : Fragment() {
         binding.pressure.compoundDrawablePadding = resources.getDimension(R.dimen.in_dp).toInt()
 
         binding.humidity.text = getString(R.string.weather_humidity, getString(R.string.empty_string))
-        binding.humidity.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_round_water_drop_24, 0, 0, 0)
+        binding.humidity.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_round_water_drop_16, 0, 0, 0)
         binding.humidity.compoundDrawablePadding = resources.getDimension(R.dimen.in_dp).toInt()
 
         Glide
@@ -250,24 +266,29 @@ class ActualWeatherFragment : Fragment() {
 
     private fun showFavoriteStar(show: Boolean?) {
         if (show == null) {
-            binding.btnFavorites.visibility = View.INVISIBLE
+            binding.btnFavoritesStar.visibility = View.INVISIBLE
+            binding.btnGoToFavoritesFragment.visibility = View.VISIBLE
         } else {
-            binding.btnFavorites.visibility = View.VISIBLE
+            binding.btnGoToFavoritesFragment.visibility = View.INVISIBLE
+            binding.btnFavoritesStar.visibility = View.VISIBLE
             setStarImageSource(show)
         }
     }
 
     private fun setStarImageSource(show: Boolean) {
         if (show) {
-            binding.btnFavorites.setImageResource(R.drawable.ic_round_star_24)
+            binding.btnFavoritesStar.setImageResource(R.drawable.ic_round_star_32)
         } else {
-            binding.btnFavorites.setImageResource(R.drawable.ic_round_star_border_24)
+            binding.btnFavoritesStar.setImageResource(R.drawable.ic_round_star_border_32)
         }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+    companion object {
+        const val ARG_LOCATION = "ARG_LOCATION"
     }
 }
 
