@@ -3,6 +3,7 @@ package com.mint.weather.favorites
 import android.location.Location
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.mint.weather.SingleLiveEvent
 import com.mint.weather.data.CityRepository
 import com.mint.weather.data.WeatherRepository
 import com.mint.weather.database.DataBaseRepository
@@ -15,7 +16,7 @@ import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
 class FavoritesViewModel @Inject constructor(
-    private val location: Location,
+    private val location: Location?,
     private val cityRepository: CityRepository,
     private val weatherRepository: WeatherRepository,
     private val dataBaseRepository: DataBaseRepository,
@@ -28,13 +29,23 @@ class FavoritesViewModel @Inject constructor(
     val showCurrentCityWeather: MutableLiveData<StateShort> by lazy { MutableLiveData<StateShort>() }
     val cityName: MutableLiveData<String> by lazy { MutableLiveData<String>() }
 
+    val hideCurrentCityView: MutableLiveData<Unit> by lazy { MutableLiveData<Unit>() }
+
     init {
-        loadCurrentLocationWeather()
-        updateCurrentCityName()
+        setCurrentCityWeather()
         loadFavoriteCityList()
     }
 
-    private fun loadCurrentLocationWeather() {
+    private fun setCurrentCityWeather() {
+        if (location == null) {
+            hideCurrentCityView.value = Unit
+        } else {
+            loadCurrentLocationWeather(location)
+            updateCurrentCityName(location)
+        }
+    }
+
+    private fun loadCurrentLocationWeather(location: Location) {
         weatherRepository.getCurrentCityWeather(location)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
@@ -47,7 +58,7 @@ class FavoritesViewModel @Inject constructor(
             .addDisposable()
     }
 
-    private fun updateCurrentCityName() {
+    private fun updateCurrentCityName(location: Location) {
         cityRepository.getCity(location)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())

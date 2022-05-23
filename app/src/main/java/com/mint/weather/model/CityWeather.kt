@@ -16,5 +16,5 @@ data class CityWeatherLong(
     val timezoneOffset: Long,
     val temperature: Double,
     val icon: String,
-    val distanceFromCurrentPlace: Double
+    val distanceFromCurrentPlace: Double?
 )

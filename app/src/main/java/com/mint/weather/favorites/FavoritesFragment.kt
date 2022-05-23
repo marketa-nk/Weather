@@ -21,7 +21,7 @@ class FavoritesFragment : Fragment() {
     lateinit var factory: FavoritesViewModelFactory.Factory
 
     private val viewModel: FavoritesViewModel by viewModels {
-        factory.create(requireArguments().getParcelable<Location?>(ARG_LOCATION)!!) //todo nata если придет null, то не показывать текущее местоположение (в случае если нет пермишена)
+        factory.create(requireArguments().getParcelable(ARG_LOCATION))
     }
 
     private var _binding: FragmentFavoritesBinding? = null
@@ -45,6 +45,9 @@ class FavoritesFragment : Fragment() {
                 is FavoritesViewModel.StateLong.Empty -> showEmptyFavoritesWeather()
                 is FavoritesViewModel.StateLong.Data -> showFavoriteCitiesWeather(list.listCityWeatherLong)
             }
+        }
+        viewModel.hideCurrentCityView.observe(this) {
+            hideCurrentCityView()
         }
     }
 
@@ -85,6 +88,12 @@ class FavoritesFragment : Fragment() {
 
     private fun showEmptyFavoritesWeather() {
         binding.favoriteCitiesError.visibility = View.VISIBLE //todo при перезапуске экрана сделать вьюшку невидимой
+    }
+
+    private fun hideCurrentCityView() {
+        binding.currentLocation.visibility = View.GONE
+        binding.favoriteText.visibility = View.GONE
+        binding.materialDivider1.visibility = View.GONE
     }
 
     override fun onDestroyView() {

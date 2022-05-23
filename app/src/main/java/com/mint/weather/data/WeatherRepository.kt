@@ -9,7 +9,7 @@ interface WeatherRepository {
 
     fun getWeatherNow(location: Location): Single<Triple<WeatherMain, List<Time>, List<DailyWeatherShort>>>
     fun getCurrentCityWeather(location: Location): Single<CityWeatherShort>
-    fun getCitiesWeather(cityList: List<FavoriteCity>, currentLocation: Location): Observable <List<CityWeatherLong>>
+    fun getCitiesWeather(cityList: List<FavoriteCity>, currentLocation: Location?): Observable <List<CityWeatherLong>>
 
 }
 

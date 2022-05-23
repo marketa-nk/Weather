@@ -45,10 +45,18 @@ class FavoriteCityView @JvmOverloads constructor(
         binding.cityName.text = cityWeatherLong.cityName
         binding.time.text = SimpleDateFormat("HH:mm", Locale.getDefault()).format(cityWeatherLong.date)
         binding.temp.text = resources.getString(R.string.deg_c, cityWeatherLong.temperature.toUiStringPlusMinus())
-        binding.distance.text = resources.getString(R.string.distanceInKm, DecimalFormat("#").format(cityWeatherLong.distanceFromCurrentPlace))
+        setDistanceFromCurrentPlace(cityWeatherLong.distanceFromCurrentPlace)
         Glide
             .with(binding.icon)
             .load(cityWeatherLong.icon)
             .into(binding.icon)
+    }
+
+    private fun setDistanceFromCurrentPlace(distance: Double?) {
+        if (distance != null) {
+            binding.distance.text = resources.getString(R.string.distanceInKm, DecimalFormat("#").format(distance))
+        } else {
+            binding.distance.text = ""
+        }
     }
 }

@@ -77,7 +77,7 @@ class WeatherRepositoryImpl @Inject constructor(networkService: NetworkService) 
             }
     }
 
-    override fun getCitiesWeather(cityList: List<FavoriteCity>, currentLocation: Location): Observable<List<CityWeatherLong>> {
+    override fun getCitiesWeather(cityList: List<FavoriteCity>, currentLocation: Location?): Observable<List<CityWeatherLong>> {
         return Observable.fromIterable(cityList)
             .concatMapSingle { city ->
                 getCityWeather(city, currentLocation)
@@ -87,7 +87,7 @@ class WeatherRepositoryImpl @Inject constructor(networkService: NetworkService) 
             .toObservable()
     }
 
-    private fun getCityWeather(favoriteCity: FavoriteCity, currentLocation: Location): Single<CityWeatherLong> {
+    private fun getCityWeather(favoriteCity: FavoriteCity, currentLocation: Location?): Single<CityWeatherLong> {
         return api.getActualWeather(favoriteCity.lat, favoriteCity.lng)
             .map { response ->
                 val timezoneDiff = response.timezoneOffset * 1000 - Calendar.getInstance().timeZone.rawOffset //millisec
@@ -110,8 +110,12 @@ class WeatherRepositoryImpl @Inject constructor(networkService: NetworkService) 
             }
     }
 
-    private fun Location.distanceToInKm(loc: Location): Double {
-        return this.distanceToInM(loc) / 1000
+    private fun Location.distanceToInKm(loc: Location?): Double? {
+        return if (loc == null) {
+            null
+        } else {
+            (this.distanceToInM(loc) / 1000)
+        }
     }
 
     private fun Location.distanceToInM(loc: Location): Double {

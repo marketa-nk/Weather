@@ -13,7 +13,7 @@ import dagger.assisted.AssistedInject
 
 class FavoritesViewModelFactory @AssistedInject constructor(
     @Assisted("location")
-    private val location: Location,
+    private val location: Location?,
     private val cityRepository: CityRepository,
     private val weatherRepository: WeatherRepository,
     private val dataBaseRepository: DataBaseRepository,
@@ -26,6 +26,6 @@ class FavoritesViewModelFactory @AssistedInject constructor(
     }
     @AssistedFactory
     interface Factory {
-        fun create(@Assisted("location") location: Location): FavoritesViewModelFactory
+        fun create(@Assisted("location") location: Location?): FavoritesViewModelFactory
     }
 }
