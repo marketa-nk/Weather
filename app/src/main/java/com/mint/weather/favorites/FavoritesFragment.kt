@@ -1,6 +1,5 @@
 package com.mint.weather.favorites
 
-import android.location.Location
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -42,7 +41,7 @@ class FavoritesFragment : Fragment() {
         }
         viewModel.citiesWeatherList.observe(this) { list ->
             when (list) {
-                is FavoritesViewModel.StateLong.Empty -> showEmptyFavoritesWeather()
+                is FavoritesViewModel.StateLong.Error -> showEmptyFavoritesWeather()
                 is FavoritesViewModel.StateLong.Data -> showFavoriteCitiesWeather(list.listCityWeatherLong)
             }
         }
@@ -87,7 +86,7 @@ class FavoritesFragment : Fragment() {
     }
 
     private fun showEmptyFavoritesWeather() {
-        binding.favoriteCitiesError.visibility = View.VISIBLE //todo при перезапуске экрана сделать вьюшку невидимой
+        binding.favoriteCitiesTextError.visibility = View.VISIBLE //todo при перезапуске экрана сделать вьюшку невидимой
     }
 
     private fun hideCurrentCityView() {

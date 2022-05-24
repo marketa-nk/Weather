@@ -3,7 +3,6 @@ package com.mint.weather.favorites
 import android.location.Location
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.mint.weather.SingleLiveEvent
 import com.mint.weather.data.CityRepository
 import com.mint.weather.data.WeatherRepository
 import com.mint.weather.database.DataBaseRepository
@@ -82,7 +81,7 @@ class FavoritesViewModel @Inject constructor(
                 citiesWeatherList.value = StateLong.Data(listWeather)
             }, {
                 it.printStackTrace()
-                citiesWeatherList.value = StateLong.Empty
+                citiesWeatherList.value = StateLong.Error
             })
             .addDisposable()
     }
@@ -109,7 +108,7 @@ class FavoritesViewModel @Inject constructor(
     }
 
     sealed class StateLong {
-        object Empty : StateLong()
+        object Error : StateLong()
         class Data(
             val listCityWeatherLong: List<CityWeatherLong>,
         ) : StateLong()
