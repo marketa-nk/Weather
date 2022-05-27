@@ -7,9 +7,9 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import com.bumptech.glide.Glide
 import com.mint.weather.R
 import com.mint.weather.databinding.FavoriteCityCompoundViewBinding
-import com.mint.weather.model.CityWeatherLong
-import com.mint.weather.model.CityWeatherShort
-import com.mint.weather.toUiString
+import com.mint.weather.model.City
+import com.mint.weather.model.CityWeather
+import com.mint.weather.model.CurrentWeather
 import com.mint.weather.toUiStringPlusMinus
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
@@ -23,17 +23,26 @@ class FavoriteCityView @JvmOverloads constructor(
 
     private val binding = FavoriteCityCompoundViewBinding.inflate(context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater, this)
 
-    fun setCityName(name: String) {
-        binding.cityName.text = name
+    fun setCityName(city: City?) {
+        if (city == null) {
+            binding.cityName.text = ""
+        } else {
+            binding.cityName.text = city.name
+        }
+
     }
 
-    fun setCityWeather(cityWeatherShort: CityWeatherShort) {
-        binding.temp.text = resources.getString(R.string.deg_c, cityWeatherShort.temperature.toUiString())
-        binding.time.text = resources.getString(R.string.current_location)
-        Glide
-            .with(binding.icon)
-            .load(cityWeatherShort.icon)
-            .into(binding.icon)
+    fun setCityWeather(weather: CurrentWeather?) {
+        if (weather == null){
+            showEmptyWeather()
+        }else{
+            binding.temp.text = resources.getString(R.string.deg_c, weather.temp.toUiStringPlusMinus())
+            binding.time.text = resources.getString(R.string.current_location)
+            Glide
+                .with(binding.icon)
+                .load(weather.iconUrl)
+                .into(binding.icon)
+        }
     }
 
     fun showEmptyWeather() {
@@ -41,14 +50,14 @@ class FavoriteCityView @JvmOverloads constructor(
         binding.time.text = "--:--"
     }
 
-    fun setCityInfo(cityWeatherLong: CityWeatherLong) {
-        binding.cityName.text = cityWeatherLong.cityName
-        binding.time.text = SimpleDateFormat("HH:mm", Locale.getDefault()).format(cityWeatherLong.date)
-        binding.temp.text = resources.getString(R.string.deg_c, cityWeatherLong.temperature.toUiStringPlusMinus())
-        setDistanceFromCurrentPlace(cityWeatherLong.distanceFromCurrentPlace)
+    fun setCityInfo(cityWeather: CityWeather) {
+        binding.cityName.text = cityWeather.city.name
+        binding.time.text = SimpleDateFormat("HH:mm", Locale.getDefault()).format(cityWeather.weather.date)
+        binding.temp.text = resources.getString(R.string.deg_c, cityWeather.weather.currentWeather.temp.toUiStringPlusMinus())
+        setDistanceFromCurrentPlace(cityWeather.distanceFromCurrentPlace)
         Glide
             .with(binding.icon)
-            .load(cityWeatherLong.icon)
+            .load(cityWeather.weather.currentWeather.iconUrl)
             .into(binding.icon)
     }
 

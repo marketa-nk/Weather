@@ -4,7 +4,6 @@ import android.Manifest
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.location.Location
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -149,8 +148,8 @@ class ActualWeatherFragment : Fragment() {
         viewModel.fillTheFavoriteStar.observe(this.viewLifecycleOwner) { show ->
             showFavoriteStar(show)
         }
-        viewModel.showFavoriteFragment.observe(this.viewLifecycleOwner){ location ->
-            showFavoriteFragment(location)
+        viewModel.showFavoriteFragment.observe(this.viewLifecycleOwner) { weatherInCurrentPlace ->
+            showFavoriteFragment(weatherInCurrentPlace)
         }
 
         return binding.root
@@ -196,10 +195,10 @@ class ActualWeatherFragment : Fragment() {
         findCitiesResultLauncher.launch(intent)
     }
 
-    private fun showFavoriteFragment(location: Location?) {
+    private fun showFavoriteFragment(currentCityWeather: CurrentCityWeather) {
         binding.root.findNavController().navigate(
             R.id.action_actualWeatherFragment_to_favoritesFragment,
-            bundleOf(ARG_LOCATION to location)
+            bundleOf(ARG_WEATHER to currentCityWeather)
         )
     }
 
@@ -207,7 +206,7 @@ class ActualWeatherFragment : Fragment() {
         binding.cityName.text = city
     }
 
-    private fun showCurrentWeather(weather: WeatherMain, hourlyWeather: List<Time>, dailyWeather: List<DailyWeatherShort>) {
+    private fun showCurrentWeather(weather: CurrentWeather, hourlyWeather: List<Time>, dailyWeather: List<DailyWeather>) {
 
         binding.temp.text = getString(R.string.weather_temperature, weather.temp.toUiString())
         binding.feelsLike.text = getString(R.string.weather_feels_like, weather.feelsLike.toUiString())
@@ -287,8 +286,9 @@ class ActualWeatherFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
+
     companion object {
-        const val ARG_LOCATION = "ARG_LOCATION"
+        const val ARG_WEATHER = "ARG_WEATHER"
     }
 }
 

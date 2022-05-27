@@ -1,7 +1,7 @@
 package com.mint.weather.database
 
 import androidx.room.*
-import com.mint.weather.model.FavoriteCity
+import com.mint.weather.model.City
 import io.reactivex.Observable
 import io.reactivex.Single
 
@@ -9,14 +9,14 @@ import io.reactivex.Single
 interface FavoriteCitiesDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertCity(favoriteCity: FavoriteCity): Single<Long>
+    fun insertCity(city: City): Single<Long>
 
     @Delete
-    fun deleteCity(favoriteCity: FavoriteCity): Single<Int>
+    fun deleteCity(city: City): Single<Int>
 
-    @Query("SELECT * FROM FavoriteCity")
-    fun getAll(): Observable<List<FavoriteCity>>
+    @Query("SELECT * FROM City")
+    fun getAll(): Observable<List<City>>
 
-    @Query("SELECT COUNT(*) FROM FavoriteCity WHERE cityId = :id")
+    @Query("SELECT COUNT(*) FROM City WHERE id = :id")
     fun isFavoriteCity(id: String): Single<Int>
 }

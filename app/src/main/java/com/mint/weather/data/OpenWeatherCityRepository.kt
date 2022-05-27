@@ -12,6 +12,15 @@ class OpenWeatherCityRepository @Inject constructor(private val networkService: 
 
     override fun getCity(location: Location): Single<City> {
         return api.getCity(location.latitude, location.longitude)
-            .map { response -> response.firstOrNull()?.let { City(it.localNames.ru ?: it.name) } }
+            .map { response ->
+                response.firstOrNull()?.let {
+                    City(
+                        "",
+                        it.localNames.ru ?: it.name,
+                        it.lat,
+                        it.lon
+                    )
+                }
+            }
     }
 }

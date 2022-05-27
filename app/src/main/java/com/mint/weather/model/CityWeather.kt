@@ -1,20 +1,21 @@
 package com.mint.weather.model
 
-import java.util.*
+import java.io.Serializable
 
-data class CityWeatherShort(
-    val temperature: Double,
-    val icon: String,
-)
+data class CityWeather(
+    val city: City,
+    val weather: Weather,
+    val distanceFromCurrentPlace: Double?,
+) : FavoritesItem
 
-data class CityWeatherLong(
-    val cityId: String,
-    val cityName: String,
-    val lat: Double,
-    val lon: Double,
-    val date: Date,
-    val timezoneOffset: Long,
-    val temperature: Double,
-    val icon: String,
-    val distanceFromCurrentPlace: Double?
-)
+data class CurrentCityWeather(
+    val city: City?,
+    val currentWeather: CurrentWeather?
+): FavoritesItem, Serializable
+
+data class FavoritesText(
+    val text: String
+) : FavoritesItem
+
+
+interface FavoritesItem

@@ -14,14 +14,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.mint.weather.R
 import com.mint.weather.databinding.ViewDailyWeatherBinding
-import com.mint.weather.model.DailyWeatherShort
+import com.mint.weather.model.DailyWeather
 import com.mint.weather.model.WindDirections
 import com.mint.weather.precipitationToInt
-import com.mint.weather.temperatureToString
 import java.text.SimpleDateFormat
 import java.util.*
 
-class DailyWeatherAdapter : ListAdapter<DailyWeatherShort, DailyWeatherAdapter.DailyWeatherViewHolder>(DailyWeatherDiffUtil()) {
+class DailyWeatherAdapter : ListAdapter<DailyWeather, DailyWeatherAdapter.DailyWeatherViewHolder>(DailyWeatherDiffUtil()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DailyWeatherViewHolder {
         val binding = ViewDailyWeatherBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -35,7 +34,7 @@ class DailyWeatherAdapter : ListAdapter<DailyWeatherShort, DailyWeatherAdapter.D
 
     inner class DailyWeatherViewHolder(private val binding: ViewDailyWeatherBinding) : RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(dailyWeatherShort: DailyWeatherShort) {
+        fun bind(dailyWeatherShort: DailyWeather) {
 
             binding.dayOfWeek.text = SimpleDateFormat("EEE", Locale.getDefault()).format(dailyWeatherShort.date)
             binding.date.text = SimpleDateFormat("d MMMM", Locale.getDefault()).format(dailyWeatherShort.date)
@@ -51,7 +50,7 @@ class DailyWeatherAdapter : ListAdapter<DailyWeatherShort, DailyWeatherAdapter.D
                 .into(binding.icon)
         }
 
-        private fun setPrecipitationData(dailyWeatherShort: DailyWeatherShort) {
+        private fun setPrecipitationData(dailyWeatherShort: DailyWeather) {
             binding.precipitation.text = setPrecipitationVolume(dailyWeatherShort.rain, dailyWeatherShort.snow)
             binding.precipitation.setPrecipitationDrawables(dailyWeatherShort.tempDay, dailyWeatherShort.tempNight)
         }

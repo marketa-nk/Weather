@@ -7,9 +7,8 @@ import io.reactivex.Single
 
 interface WeatherRepository {
 
-    fun getWeatherNow(location: Location): Single<Triple<WeatherMain, List<Time>, List<DailyWeatherShort>>>
-    fun getCurrentCityWeather(location: Location): Single<CityWeatherShort>
-    fun getCitiesWeather(cityList: List<FavoriteCity>, currentLocation: Location?): Observable <List<CityWeatherLong>>
+    fun getWeather(location: Location): Single<Weather>
+    fun getCitiesWeather(cityList: List<City>, currentLocation: Location?): Observable <List<CityWeather>>
 
 }
 

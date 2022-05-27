@@ -14,10 +14,10 @@ class WeatherRepositoryImpl @Inject constructor(networkService: NetworkService) 
 
     private val api = networkService.openWeatherApi
 
-    override fun getWeatherNow(location: Location): Single<Triple<WeatherMain, List<Time>, List<DailyWeatherShort>>> {
+    override fun getWeather(location: Location): Single<Weather> {
         return api.getActualWeather(location.latitude, location.longitude)
             .map { response ->
-                val weather = WeatherMain(
+                val weather = CurrentWeather(
                     response.current.temp,
                     response.current.weather[0].description.replaceFirstChar { c -> c.uppercase() },
                     response.current.feelsLike,
@@ -27,10 +27,15 @@ class WeatherRepositoryImpl @Inject constructor(networkService: NetworkService) 
                     response.current.pressure,
                     response.current.humidity
                 )
-                Triple(weather, getHourlyWeather(response), getDailyWeather(response))
+                val timezoneDiffMs = response.timezoneOffset * 1000 - Calendar.getInstance().timeZone.rawOffset
+                Weather(
+                    Date(response.current.dt * 1000 + timezoneDiffMs),
+                    weather,
+                    getHourlyWeather(response),
+                    getDailyWeather(response)
+                )
             }
     }
-
 
     private fun getHourlyWeather(actualWeather: ActualWeather): List<Time> {
         val timezoneDiff = actualWeather.timezoneOffset * 1000 - Calendar.getInstance().timeZone.rawOffset //millisec
@@ -51,10 +56,10 @@ class WeatherRepositoryImpl @Inject constructor(networkService: NetworkService) 
         return (sunrises + sunsets + hourlyWeather).sortedBy { it.date }
     }
 
-    private fun getDailyWeather(actualWeather: ActualWeather): List<DailyWeatherShort> {
+    private fun getDailyWeather(actualWeather: ActualWeather): List<DailyWeather> {
         return actualWeather.daily.map {
             val icon = it.weather[0].icon
-            DailyWeatherShort(
+            DailyWeather(
                 Date(it.dt * 1000),
                 it.temp.day,
                 it.temp.night,
@@ -69,15 +74,7 @@ class WeatherRepositoryImpl @Inject constructor(networkService: NetworkService) 
         }
     }
 
-    override fun getCurrentCityWeather(location: Location): Single<CityWeatherShort> {
-        return api.getActualWeather(location.latitude, location.longitude)
-            .map { response ->
-                val icon = response.current.weather[0].icon
-                CityWeatherShort(response.current.temp, getOpenWeatherIconUrl(icon))
-            }
-    }
-
-    override fun getCitiesWeather(cityList: List<FavoriteCity>, currentLocation: Location?): Observable<List<CityWeatherLong>> {
+    override fun getCitiesWeather(cityList: List<City>, currentLocation: Location?): Observable<List<CityWeather>> {
         return Observable.fromIterable(cityList)
             .concatMapSingle { city ->
                 getCityWeather(city, currentLocation)
@@ -87,24 +84,16 @@ class WeatherRepositoryImpl @Inject constructor(networkService: NetworkService) 
             .toObservable()
     }
 
-    private fun getCityWeather(favoriteCity: FavoriteCity, currentLocation: Location?): Single<CityWeatherLong> {
-        return api.getActualWeather(favoriteCity.lat, favoriteCity.lng)
-            .map { response ->
-                val timezoneDiff = response.timezoneOffset * 1000 - Calendar.getInstance().timeZone.rawOffset //millisec
-                val icon = response.current.weather[0].icon
-                val cityLocation = Location("loc").also {
-                    it.latitude = favoriteCity.lat
-                    it.longitude = favoriteCity.lng
-                }
-                CityWeatherLong(
-                    favoriteCity.cityId,
-                    favoriteCity.name,
-                    favoriteCity.lat,
-                    favoriteCity.lng,
-                    Date(response.current.dt * 1000 + timezoneDiff),
-                    response.timezoneOffset,
-                    response.current.temp,
-                    getOpenWeatherIconUrl(icon),
+    private fun getCityWeather(city: City, currentLocation: Location?): Single<CityWeather> {
+        val cityLocation = Location("loc").also {
+            it.latitude = city.latitude
+            it.longitude = city.longitude
+        }
+        return getWeather(cityLocation)
+            .map { weather ->
+                CityWeather(
+                    city,
+                    weather,
                     cityLocation.distanceToInKm(currentLocation)
                 )
             }
@@ -114,20 +103,7 @@ class WeatherRepositoryImpl @Inject constructor(networkService: NetworkService) 
         return if (loc == null) {
             null
         } else {
-            (this.distanceToInM(loc) / 1000)
+            (this.distanceTo(loc).toDouble() / 1000)
         }
-    }
-
-    private fun Location.distanceToInM(loc: Location): Double {
-        val location1 = Location("loc")
-            .also {
-                it.latitude = this.latitude
-                it.longitude = this.longitude
-            }
-        val location2 = Location("loc").also {
-            latitude = loc.latitude
-            longitude = loc.longitude
-        }
-        return location1.distanceTo(location2).toDouble()
     }
 }

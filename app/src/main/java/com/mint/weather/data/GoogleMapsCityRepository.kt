@@ -14,6 +14,13 @@ class GoogleMapsCityRepository @Inject constructor(private val networkService: N
 
     override fun getCity(location: Location): Single<City> {
         return api.getCity("${location.latitude},${location.longitude}")
-            .map { City(it.results[0].addressComponents[0].longName) }
+            .map {
+                City(
+                    it.results[0].placeID,
+                    it.results[0].addressComponents[0].longName,
+                    it.results[0].geometry.location.lat,
+                    it.results[0].geometry.location.lng,
+                )
+            }
     }
 }

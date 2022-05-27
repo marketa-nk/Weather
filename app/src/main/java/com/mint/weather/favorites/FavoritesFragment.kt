@@ -8,10 +8,12 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mint.weather.App
-import com.mint.weather.actualweather.ActualWeatherFragment.Companion.ARG_LOCATION
+import com.mint.weather.actualweather.ActualWeatherFragment.Companion.ARG_WEATHER
 import com.mint.weather.databinding.FragmentFavoritesBinding
-import com.mint.weather.model.CityWeatherLong
-import com.mint.weather.model.CityWeatherShort
+import com.mint.weather.model.City
+import com.mint.weather.model.CurrentCityWeather
+import com.mint.weather.model.CurrentWeather
+import com.mint.weather.model.FavoritesItem
 import javax.inject.Inject
 
 class FavoritesFragment : Fragment() {
@@ -20,7 +22,7 @@ class FavoritesFragment : Fragment() {
     lateinit var factory: FavoritesViewModelFactory.Factory
 
     private val viewModel: FavoritesViewModel by viewModels {
-        factory.create(requireArguments().getParcelable(ARG_LOCATION))
+         factory.create(requireArguments().getSerializable(ARG_WEATHER) as CurrentCityWeather?) //todo nata
     }
 
     private var _binding: FragmentFavoritesBinding? = null
@@ -32,21 +34,11 @@ class FavoritesFragment : Fragment() {
         super.onCreate(savedInstanceState)
         App.instance.appComponent.injectFavoritesFragment(this)
 
-        viewModel.cityName.observe(this) { name -> setCurrentCityName(name) }
-        viewModel.showCurrentCityWeather.observe(this) { weather ->
-            when (weather) {
-                is FavoritesViewModel.StateShort.Empty -> showCurrentCityEmptyWeather()
-                is FavoritesViewModel.StateShort.Data -> showCurrentCityWeather(weather.cityWeatherShort)
-            }
+        viewModel.showCitiesWeatherList.observe(this){
+            showFavoriteCitiesWeather(it)
         }
-        viewModel.citiesWeatherList.observe(this) { list ->
-            when (list) {
-                is FavoritesViewModel.StateLong.Error -> showEmptyFavoritesWeather()
-                is FavoritesViewModel.StateLong.Data -> showFavoriteCitiesWeather(list.listCityWeatherLong)
-            }
-        }
-        viewModel.hideCurrentCityView.observe(this) {
-            hideCurrentCityView()
+        viewModel.showErrorFavoritesWeather.observe(this) {
+            showEmptyFavoritesWeather()
         }
     }
 
@@ -59,40 +51,22 @@ class FavoritesFragment : Fragment() {
         binding.recyclerView.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
         binding.recyclerView.adapter = favoritesCitiesAdapter
 
-        favoritesCitiesAdapter.cityListener = object : FavoriteCitiesAdapter.OnCityClickListener {
-            override fun onItemClick(city: CityWeatherLong) {
-                viewModel.cityClicked(city)
-            }
-        }
+//        favoritesCitiesAdapter.cityListener = object : FavoriteCitiesAdapter.OnCityClickListener {
+//            override fun onItemClick(city: CityWeather) {
+//                viewModel.cityClicked(city)
+//            }
+//        }
         binding.myToolbar.setNavigationOnClickListener { activity?.onBackPressed() }
 
         return binding.root
     }
 
-    private fun showCurrentCityWeather(weather: CityWeatherShort) {
-        binding.currentLocation.setCityWeather(weather)
-    }
-
-    private fun setCurrentCityName(name: String) {
-        binding.currentLocation.setCityName(name)
-    }
-
-    private fun showCurrentCityEmptyWeather() {
-        binding.currentLocation.showEmptyWeather()
-    }
-
-    private fun showFavoriteCitiesWeather(list: List<CityWeatherLong>) {
+    private fun showFavoriteCitiesWeather(list: List<FavoritesItem>) {
         favoritesCitiesAdapter.submitList(list)
     }
 
     private fun showEmptyFavoritesWeather() {
         binding.favoriteCitiesTextError.visibility = View.VISIBLE //todo при перезапуске экрана сделать вьюшку невидимой
-    }
-
-    private fun hideCurrentCityView() {
-        binding.currentLocation.visibility = View.GONE
-        binding.favoriteText.visibility = View.GONE
-        binding.materialDivider1.visibility = View.GONE
     }
 
     override fun onDestroyView() {

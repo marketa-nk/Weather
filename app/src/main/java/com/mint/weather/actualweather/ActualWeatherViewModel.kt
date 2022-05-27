@@ -24,8 +24,8 @@ class ActualWeatherViewModel(
 ) : ViewModel() {
 
     private var location: Location? = null
-
-    private var currentCity: CurrentCity? = null
+    private var currentCity: City? = null
+    private var currentWeather: CurrentWeather? = null
 
     val showProgress: MutableLiveData<Boolean> by lazy { MutableLiveData<Boolean>(false) }
     val checkLocationPermissionEvent: SingleLiveEvent<Unit> by lazy { SingleLiveEvent<Unit>() }
@@ -39,7 +39,7 @@ class ActualWeatherViewModel(
 
     val fillTheFavoriteStar: MutableLiveData<Boolean?> by lazy { MutableLiveData<Boolean?>() }
 
-    val showFavoriteFragment: SingleLiveEvent<Location?> by lazy { SingleLiveEvent<Location?>() }
+    val showFavoriteFragment: SingleLiveEvent<CurrentCityWeather> by lazy { SingleLiveEvent<CurrentCityWeather>() }
 
     private val compositeDisposable = CompositeDisposable()
 
@@ -80,12 +80,12 @@ class ActualWeatherViewModel(
 
     fun cityIsSelected(cityId: String, name: String?, latLng: LatLng) {
         showProgress.value = true
-        val selectedCity = CurrentCity(cityId, name ?: "", latLng.latitude, latLng.longitude)
+        val selectedCity = City(cityId, name ?: "", latLng.latitude, latLng.longitude)
         cityName.value = selectedCity.name
-        fillOrNotFavoriteStar(selectedCity.cityId)
+        fillOrNotFavoriteStar(selectedCity.id)
         updateWeather(Location("loc").also {
-            it.latitude = selectedCity.lat
-            it.longitude = selectedCity.lng
+            it.latitude = selectedCity.latitude
+            it.longitude = selectedCity.longitude
         })
         currentCity = selectedCity
     }
@@ -125,6 +125,7 @@ class ActualWeatherViewModel(
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
                 cityName.value = it.name
+                currentCity = it
             }, {
                 it.printStackTrace()
                 cityName.value = ""
@@ -133,11 +134,14 @@ class ActualWeatherViewModel(
     }
 
     private fun updateWeather(location: Location) {
-        weatherRepository.getWeatherNow(location)
+        weatherRepository.getWeather(location)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe({ (weather, hourlyWeather, dailyWeather) ->
+            .subscribe({ (date, weather, hourlyWeather, dailyWeather) ->
                 showWeather.value = State.Data(weather, hourlyWeather, dailyWeather)
+                if (location == this.location) {
+                    currentWeather = weather
+                }
                 showProgress.value = false
             }, {
                 it.printStackTrace()
@@ -150,17 +154,16 @@ class ActualWeatherViewModel(
     fun favoriteBtnPressed() {
         val city = currentCity
         if (city != null) {
-            val favoriteCity = FavoriteCity(city.cityId, city.name, city.lat, city.lng)
-            dataBaseRepository.isFavoriteCity(city.cityId)
+            dataBaseRepository.isFavoriteCity(city.id)
                 .flatMap { favorite ->
                     if (favorite) {
-                        dataBaseRepository.deleteCityFromFavorites(favoriteCity)
+                        dataBaseRepository.deleteCityFromFavorites(city)
                     } else {
-                        dataBaseRepository.saveCityToFavorites(favoriteCity)
+                        dataBaseRepository.saveCityToFavorites(city)
                     }
                 }
                 .ignoreElement()
-                .andThen(dataBaseRepository.isFavoriteCity(city.cityId))
+                .andThen(dataBaseRepository.isFavoriteCity(city.id))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
@@ -182,7 +185,7 @@ class ActualWeatherViewModel(
     }
 
     fun btnGoToFavoritesFragmentPressed() {
-        showFavoriteFragment.value = location
+        showFavoriteFragment.value = CurrentCityWeather(currentCity, currentWeather) //todo nata null
     }
 
     class ActualWeatherViewModelFactory @Inject constructor(
@@ -202,9 +205,9 @@ class ActualWeatherViewModel(
     sealed class State {
         object Empty : State()
         class Data(
-            val currentWeather: WeatherMain,
+            val currentWeather: CurrentWeather,
             val hourlyWeather: List<Time>,
-            val dailyWeather: List<DailyWeatherShort>,
+            val dailyWeather: List<DailyWeather>,
         ) : State()
     }
 }
